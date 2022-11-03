@@ -1,4 +1,4 @@
-# Xray reporter for Playwright
+# [WIP] Xray reporter for Playwright
 
 Publish Playwright test run on Xray
 
@@ -76,3 +76,7 @@ playwright-xray is [MIT licensed](./LICENSE).
 ## Author
 
 Fúlvio Carvalhido <inluxc@gmail.com>
+
+## Supported by:
+
+Diller <https://diller.no/>
