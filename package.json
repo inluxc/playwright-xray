@@ -1,7 +1,7 @@
 {
-  "name": "playwright-zephyr",
-  "version": "0.0.10",
-  "description": "Zephyr reporter for the Playwright",
+  "name": "playwright-xray",
+  "version": "0.0.1",
+  "description": "XRAY reporter for the Playwright",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
   "files": [
@@ -20,21 +20,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/elaichenkov/playwright-zephyr.git"
+    "url": "git+https://github.com/inluxc/playwright-xray.git"
   },
   "keywords": [
     "playwright",
-    "zephyr",
+    "xray",
     "reporter",
     "typescript",
     "tools"
   ],
-  "author": "Yevhen Laichenkov <elaichenkov@gmail.com>",
+  "author": "Fúlvio Carvalhido <inluxc@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/elaichenkov/playwright-zephyr/issues"
+    "url": "https://github.com/inluxc/playwright-xray/issues"
   },
-  "homepage": "https://github.com/elaichenkov/playwright-zephyr#readme",
+  "homepage": "https://github.com/inluxc/playwright-xray#readme",
   "devDependencies": {
     "@playwright/test": "^1.17.2",
     "prettier": "^2.5.1",

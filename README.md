@@ -1,11 +1,14 @@
-# Zephyr reporter for Playwright
+# Xray reporter for Playwright
 
-Publish Playwright test run on Zephyr
+Publish Playwright test run on Xray
+
+This reporter is based in playwright zephyr from Yevhen Laichenkov https://github.com/elaichenkov/playwright-zephyr
+Thanks Yevhen for the great contribution
 
 ## Install
 
 ```sh
-npm i -D playwright-zephyr
+npm i -D playwright-xray
 ```
 
 ## Usage
@@ -19,7 +22,7 @@ With `user` and `password` options:
 import { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
-  reporter: [['playwright-zephyr', { 
+  reporter: [['playwright-xray', { 
     host: 'https://jira.your-company-domain.com/',
     user: 'username',
     password: 'password',
@@ -35,7 +38,7 @@ With `authorizationToken` option instead of `user` and `password`:
 import { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
-  reporter: [['playwright-zephyr', { 
+  reporter: [['playwright-xray', { 
     host: 'https://jira.your-company-domain.com/',
     authorizationToken: 'SVSdrtwgDSA312342--',
     projectKey: 'JARV'
@@ -43,10 +46,10 @@ const config: PlaywrightTestConfig = {
 }
 ```
 
-Also, your playwright tests should include unique ID inside square brackets `[J79]` of your Zephyr test case:
+Also, your playwright tests should include unique ID inside square brackets `[J79]` of your Xray test case:
 
 ```typescript
-//      ↓  Zephyr test case ID inside square brackets
+//      ↓  Xray test case ID inside square brackets
 test('[J79] basic test', async ({ page }) => {
   await page.goto('https://playwright.dev/');
   const title = page.locator('.navbar__inner .navbar__title');
@@ -62,14 +65,14 @@ Then run your tests with `npx playwright test` command and you'll see the result
 🔗 https://jira.your-company-domain.com/secure/Tests.jspa#/testPlayer/JARV-C2901
 ```
 
-And you'll see the result in the Zephyr:
+And you'll see the result in the Xray:
 
-![alt text](./assets/zephyr-result.png)
+![alt text](./assets/xray-result.png)
 
 ## License
 
-playwright-zephyr is [MIT licensed](./LICENSE).
+playwright-xray is [MIT licensed](./LICENSE).
 
 ## Author
 
-Yevhen Laichenkov <elaichenkov@gmail.com>
+Fúlvio Carvalhido <inluxc@gmail.com>

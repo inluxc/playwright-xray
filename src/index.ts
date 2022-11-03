@@ -1,32 +1,32 @@
-import type { ZephyrOptions, ZephyrStatus, ZephyrTestResult } from '../types/zephyr.types';
+import type { XrayOptions, XrayStatus, XrayTestResult } from '../types/xray.types';
 import type { Reporter, TestCase, TestResult, TestStatus } from '@playwright/test/reporter';
 
-import { ZephyrService } from './zephyr.service';
+import { XrayService } from './xray.service';
 
-function convertPwStatusToZephyr(status: TestStatus): ZephyrStatus {
-  if (status === 'passed') return 'Pass';
-  if (status === 'failed') return 'Fail';
+function convertPwStatusToXRay(status: TestStatus): XrayStatus {
+  if (status === 'passed') return 'PASSED';
+  if (status === 'failed') return 'FAILED';
   if (status === 'skipped') return 'Not Executed';
   if (status === 'timedOut') return 'Blocked';
 
   return 'Not Executed';
 }
 
-class ZephyrReporter implements Reporter {
-  private zephyrService!: ZephyrService;
-  private testResults: ZephyrTestResult[] = [];
+class XrayReporter implements Reporter {
+  private xrayService!: XrayService;
+  private testResults: XrayTestResult[] = [];
   private projectKey!: string;
   private testCaseKeyPattern = /\[(.*?)\]/;
-  private options: ZephyrOptions;
+  private options: XrayOptions;
 
-  constructor(options: ZephyrOptions) {
+  constructor(options: XrayOptions) {
     this.options = options;
   }
 
   async onBegin() {
     this.projectKey = this.options.projectKey;
 
-    this.zephyrService = new ZephyrService(this.options);
+    this.xrayService = new XrayService(this.options);
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
@@ -34,7 +34,7 @@ class ZephyrReporter implements Reporter {
       const [, projectName] = test.titlePath();
       const [, testCaseId] = test.title.match(this.testCaseKeyPattern)!;
       const testCaseKey = `${this.projectKey}-${testCaseId}`;
-      const status = convertPwStatusToZephyr(result.status);
+      const status = convertPwStatusToXRay(result.status);
       // @ts-ignore
       const browserName = test._pool.registrations.get('browserName').fn;
       const capitalize = (word: string) => word && word[0]!.toUpperCase() + word.slice(1);
@@ -50,11 +50,11 @@ class ZephyrReporter implements Reporter {
 
   async onEnd() {
     if (this.testResults.length > 0) {
-      await this.zephyrService.createRun(this.testResults);
+      await this.xrayService.createRun(this.testResults);
     } else {
       console.log(`There are no tests with such ${this.testCaseKeyPattern} key pattern`);
     }
   }
 }
 
-export default ZephyrReporter;
+export default XrayReporter;

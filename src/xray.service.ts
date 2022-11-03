@@ -1,6 +1,6 @@
-import { ZephyrTestResult } from './../types/zephyr.types';
+import { XrayTestResult } from '../types/xray.types';
 import axios, { Axios, AxiosError } from 'axios';
-import { ZephyrOptions } from '../types/zephyr.types';
+import { XrayOptions } from '../types/xray.types';
 import { inspect } from 'util';
 import { bold, green } from 'picocolors';
 
@@ -8,7 +8,7 @@ function isAxiosError(error: any): error is AxiosError {
   return error.isAxiosError === true;
 }
 
-export class ZephyrService {
+export class XrayService {
   private readonly host: string;
   private readonly url: string;
   private readonly user: string;
@@ -19,7 +19,7 @@ export class ZephyrService {
   private readonly axios: Axios;
   private readonly defaultRunName = `[${new Date().toUTCString()}] - Automated run`;
 
-  constructor(options: ZephyrOptions) {
+  constructor(options: XrayOptions) {
     if (!options.host) throw new Error('"host" option is missed. Please, provide it in the config');
     if (!options.projectKey) throw new Error('"projectKey" option is missed. Please, provide it in the config');
     if ((!options.user || !options.password) && !options.authorizationToken)
@@ -43,7 +43,7 @@ export class ZephyrService {
     });
   }
 
-  async createRun(items: ZephyrTestResult[], name = this.defaultRunName): Promise<string> {
+  async createRun(items: XrayTestResult[], name = this.defaultRunName): Promise<string> {
     const URL = `${this.url}/testrun`;
 
     try {
