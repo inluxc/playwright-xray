@@ -43,7 +43,6 @@
   },
   "dependencies": {
     "axios": "^0.24.0",
-    "openapi-typescript-validator": "^3.3.0",
     "picocolors": "^1.0.0"
   }
 }
