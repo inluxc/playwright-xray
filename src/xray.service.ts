@@ -17,8 +17,6 @@ export class XrayService {
   private readonly requestUrl: string;
   private axios: Axios;
 
-  private readonly xrayOptions!: XrayOptions;
-
   constructor(options: XrayOptions) {
     // Init vars
     this.xray = '';
@@ -106,7 +104,6 @@ export class XrayService {
     // Set Test Plan
     if (!options.testPlan) throw new Error('"testPlan" option are missed. Please provide them in the config');
 
-    this.xrayOptions = options;
   }
 
   async createRun(results: XrayTestResult) {
