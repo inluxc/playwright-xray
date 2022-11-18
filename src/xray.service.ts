@@ -103,7 +103,6 @@ export class XrayService {
 
     // Set Test Plan
     if (!options.testPlan) throw new Error('"testPlan" option are missed. Please provide them in the config');
-
   }
 
   async createRun(results: XrayTestResult) {
