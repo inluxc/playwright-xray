@@ -1,6 +1,6 @@
-import { XrayTestResult } from '../types/xray.types';
-import axios, { Axios, AxiosError } from 'axios';
 import { XrayOptions } from '../types/xray.types';
+import { XrayTestResult } from '../types/cloud.types';
+import axios, { Axios, AxiosError } from 'axios';
 import { inspect } from 'util';
 import { bold, green } from 'picocolors';
 
@@ -9,61 +9,120 @@ function isAxiosError(error: any): error is AxiosError {
 }
 
 export class XrayService {
-  private readonly host: string;
-  private readonly url: string;
-  private readonly user: string;
+  private readonly xray: string;
+  private readonly jira: string;
+  private readonly username: string;
   private readonly password: string;
-  private readonly authorizationToken: string;
-  private readonly basicAuthToken: string;
-  private readonly projectKey: string;
-  private readonly axios: Axios;
-  private readonly defaultRunName = `[${new Date().toUTCString()}] - Automated run`;
+  private readonly type: string;
+  private readonly requestUrl: string;
+  private axios: Axios;
+
+  private readonly xrayOptions!: XrayOptions;
 
   constructor(options: XrayOptions) {
-    if (!options.host) throw new Error('"host" option is missed. Please, provide it in the config');
+    // Init vars
+    this.xray = '';
+    this.username = '';
+    this.password = '';
+    this.requestUrl = '';
+
+    // Set Jira URL
+    if (!options.jira.url) throw new Error('"jira.url" option is missed. Please, provide it in the config');
+    this.jira = options.jira.url;
+
+    // Set Jira Server Type
+    if (!options.jira.type) throw new Error('"jira.type" option is missed. Please, provide it in the config');
+    this.type = options.jira.type;
+
+    // Init axios instance
+    this.axios = axios;
+
+    switch (this.type) {
+      case 'cloud':
+        // Set Xray Server URL
+        this.xray = 'https://xray.cloud.getxray.app/';
+
+        // Set Xray Credencials
+        if (!options.cloud?.client_id || !options.cloud?.client_secret)
+          throw new Error('"cloud.client_id" and/or "cloud.client_secret" options are missed. Please provide them in the config');
+        this.username = options.cloud?.client_id;
+        this.password = options.cloud?.client_secret;
+
+        // Set Request URL
+        this.requestUrl = this.xray + 'api/v2';
+
+        //Create Axios Instance with Auth
+        axios
+          .post(this.requestUrl + '/authenticate', {
+            client_id: this.username,
+            client_secret: this.password,
+          })
+          .then((request) => {
+            this.axios = axios.create({
+              baseURL: this.xray,
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${request.data}`,
+              },
+            });
+          })
+          .catch((error) => {
+            throw new Error(`Failed to autenticate do host ${this.xray} with error: ${error}`);
+          });
+
+        break;
+
+      case 'server':
+        // Set Xray Server URL
+        if (!options.server?.url) throw new Error('"host" option is missed. Please, provide it in the config');
+        this.xray = options.server?.url;
+
+        // Set Xray Credencials
+        if (!options.server?.username || !options.server?.password)
+          throw new Error('"server.username" and/or "server.password" options are missed. Please provide them in the config');
+        this.username = options.server?.username;
+        this.password = options.server?.password;
+
+        // Set Request URL
+        this.requestUrl = this.xray + 'rest/raven/2.0/api';
+
+        //Create Axios Instance with Auth
+        const token = `${this.username}:${this.password}`;
+        const encodedToken = Buffer.from(token).toString('base64');
+        this.axios = axios.create({
+          baseURL: this.xray,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${encodedToken}`,
+          },
+        });
+
+        break;
+    }
+
+    // Set Project Key
     if (!options.projectKey) throw new Error('"projectKey" option is missed. Please, provide it in the config');
-    if ((!options.user || !options.password) && !options.authorizationToken)
-      throw new Error('"user" and/or "password" or "authorizationToken" options are missed. Please provide them in the config');
 
-    this.host = options.host;
-    this.url = `${this.host}/rest/atm/1.0`;
-    this.user = options.user!;
-    this.password = options.password!;
-    this.basicAuthToken = Buffer.from(`${this.user}:${this.password}`).toString('base64');
-    this.authorizationToken = options.authorizationToken ?? this.basicAuthToken;
-    this.projectKey = options.projectKey;
+    // Set Test Plan
+    if (!options.testPlan) throw new Error('"testPlan" option are missed. Please provide them in the config');
 
-    this.axios = axios.create({
-      baseURL: this.url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Basic ${this.authorizationToken}`,
-      },
-      ...options,
-    });
+    this.xrayOptions = options;
   }
 
-  async createRun(items: XrayTestResult[], name = this.defaultRunName): Promise<string> {
-    const URL = `${this.url}/testrun`;
+  async createRun(results: XrayTestResult) {
+    const URL = `${this.requestUrl}/import/execution`;
 
     try {
-      const response = await this.axios.post(URL, {
-        name,
-        projectKey: this.projectKey,
-        items,
-      });
-
-      if (response.status !== 201) throw new Error(`${response.status} - Failed to create test cycle`);
+      const response = await this.axios.post(URL, JSON.stringify(results));
+      if (response.status !== 200) throw new Error(`${response.status} - Failed to create test cycle`);
 
       const {
-        data: { key },
+        data: { key, id },
       } = response;
 
       console.log(`${bold(green(`✅ Test cycle ${key} has been created`))}`);
       console.log(`${bold(green('👇 Check out the test result'))}`);
-      console.log(`🔗 ${this.host}/secure/Tests.jspa#/testPlayer/${key}`);
-
-      return response.data.key;
+      console.log(`${bold(green(`🔗 ${this.jira}/browse/${id}`))}`);
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(`Config: ${inspect(error.config)}`);

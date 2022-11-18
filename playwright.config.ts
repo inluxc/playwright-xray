@@ -2,13 +2,22 @@
 import { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
-  reporter: [['list'], ['./src/zephyr.reporter.ts', { 
-    host: '',
-    runName: '',
-    user: '',
-    password: '',
-    authorizationToken: '',
-    projectKey: ''
+  reporter: [['./src/index.ts', { 
+    jira: {
+      url: 'https://client.atlassian.net/',
+      type: 'cloud', // cloud, server
+    },
+    cloud: {
+      client_id: '',
+      client_secret: '',
+    },
+    server: {
+      url: 'https://sandbox.xpand-it.com/rest/raven/2.0/api',
+      user: '',
+      password: ''
+    },
+    projectKey: 'CODE',
+    testPlan: 'CODE-1820'
   }]],
   use: {
       screenshot: 'only-on-failure'
@@ -20,21 +29,7 @@ const config: PlaywrightTestConfig = {
         browserName: 'chromium',
         channel: 'chrome',
       },
-    },
-    {
-      name: 'Safari',
-      use: {
-        browserName: 'webkit',
-        viewport: { width: 1200, height: 750 },
-      }
-    },
-    {
-      name: 'Firefox',
-      use: {
-        browserName: 'firefox',
-        viewport: { width: 800, height: 600 },
-      }
-    },
+    }
   ],
 };
 export default config;

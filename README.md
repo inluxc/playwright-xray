@@ -23,24 +23,9 @@ import { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
   reporter: [['playwright-xray', { 
-    host: 'https://jira.your-company-domain.com/',
-    user: 'username',
-    password: 'password',
-    projectKey: 'JARV'
-  }]],
-}
-```
-
-With `authorizationToken` option instead of `user` and `password`:
-
-```typescript
-// playwright.config.ts
-import { PlaywrightTestConfig } from '@playwright/test';
-
-const config: PlaywrightTestConfig = {
-  reporter: [['playwright-xray', { 
-    host: 'https://jira.your-company-domain.com/',
-    authorizationToken: 'SVSdrtwgDSA312342--',
+    host: 'https://xray.cloud.getxray.app/api/v2',
+    client_id: 'client_id',
+    client_secret: 'password',
     projectKey: 'JARV'
   }]],
 }
