@@ -1,8 +1,8 @@
 import { XrayOptions } from '../types/xray.types';
-import { Execution } from '../types/cloud.types';
+import { XrayTestResult } from '../types/cloud.types';
 import axios, { Axios, AxiosError } from 'axios';
 import { inspect } from 'util';
-import { blue, bold, green, red, yellow } from 'picocolors';
+import { blue, bold, green, red } from 'picocolors';
 
 function isAxiosError(error: any): error is AxiosError {
   return error.isAxiosError === true;
@@ -105,13 +105,11 @@ export class XrayService {
     if (!options.testPlan) throw new Error('"testPlan" option are missed. Please provide them in the config');
   }
 
-  async createRun(results: Execution) {
+  async createRun(results: XrayTestResult) {
     const URL = `${this.requestUrl}/import/execution`;
-    const total = results.tests.length;
+    const total = results.tests?.length;
     let passed = 0;
     let failed = 0;
-    let todo = 0;
-
 
     results.tests!.forEach((test: { status: any; }) => {
       switch (test.status) {
