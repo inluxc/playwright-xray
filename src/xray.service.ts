@@ -111,7 +111,7 @@ export class XrayService {
     let passed = 0;
     let failed = 0;
 
-    results.tests!.forEach((test: { status: any; }) => {
+    results.tests!.forEach((test: { status: any }) => {
       switch (test.status) {
         case 'PASSED':
           passed = passed + 1;
@@ -144,7 +144,6 @@ export class XrayService {
       console.log(`${bold(blue(`🔗 ${this.jira}/browse/${key}`))}`);
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
-
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(`Config: ${inspect(error.config)}`);
