@@ -1,6 +1,8 @@
-import type { XrayTestResult, XrayTest, XrayTestSteps } from '../types/cloud.types';
+import type { XrayTestResult, XrayTestSteps, XrayTestEvidence, XrayTest } from '../types/cloud.types';
 import type { XrayOptions } from '../types/xray.types';
 import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import { XrayService } from './xray.service';
 
@@ -8,6 +10,7 @@ class XrayReporter implements Reporter {
   private xrayService!: XrayService;
   private testResults!: XrayTestResult;
   private testCaseKeyPattern = /\[(.*?)\]/;
+  private receivedRegEx: RegExp = /Received string: "(.*?)"(?=\n)/;  
   private options: XrayOptions;
   private totalDuration: number;
   private readonly defaultRunName = `[${new Date().toUTCString()}] - Automated run`;
@@ -16,8 +19,6 @@ class XrayReporter implements Reporter {
     this.options = options;
     this.xrayService = new XrayService(this.options);
     this.totalDuration = 0;
-
-    //const finishTime = new Date(this.xrayService.startTime.getTime() + (result.duration * 1000));
     const testResults: XrayTestResult = {
       info: {
         summary: this.defaultRunName,
@@ -31,15 +32,13 @@ class XrayReporter implements Reporter {
     this.testResults = testResults;
   }
 
-  async onBegin() {}
-
   async onTestEnd(testCase: TestCase, result: TestResult) {
     const testCaseId = testCase.title.match(this.testCaseKeyPattern);
     const testCode: string = testCaseId != null ? testCaseId[1]! : '';
     if (testCode != '') {
       // @ts-ignore
       const browserName = testCase._pool.registrations.get('browserName').fn;
-      const finishTime = new Date(result.startTime.getTime() + result.duration * 1000);
+      const finishTime = new Date(result.startTime.getTime() + result.duration);
       this.totalDuration = this.totalDuration + result.duration;
 
       let xrayTestData: XrayTest = {
@@ -49,28 +48,51 @@ class XrayReporter implements Reporter {
         finish: finishTime.toISOString(),
         steps: [] as XrayTestSteps[],
       };
-
-      // Generated step and error messages
+      
       await Promise.all(
         result.steps.map(async (step) => {
           if (step.category != 'hook') {
+            // Add Step to request
+            const errorMessage = step.error?.stack?.toString()?.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+            const received = this.receivedRegEx.exec(errorMessage!);
+            let dataReceived = ""
+            if(received?.[1] !== undefined) {
+              dataReceived = received?.[1];
+            }
+
             const xrayTestStep: XrayTestSteps = {
-              status: typeof step.error == 'object' ? 'FAILED' : 'SUCCESS',
-              comment: step.title,
-              actualResult: typeof step.error == 'object' ? step.error.message?.toString()! : '',
+              status: typeof step.error == 'object' ? 'FAILED' : 'PASSED',
+              comment: typeof step.error == 'object' ? errorMessage : '',
+              actualResult: dataReceived,
             };
             xrayTestData.steps!.push(xrayTestStep);
           }
         }),
       );
+
+      // Get evidences from test results (video, images, text)
+      const evidences: XrayTestEvidence[] = [];
+      if (result.attachments.length > 0) {
+        result.attachments.map(async (attach) => {
+          const filename = path.basename(attach.path!);
+          const attachData = fs.readFileSync(attach.path!, { encoding: 'base64' });
+          const evid: XrayTestEvidence = {
+            data: attachData,
+            filename: filename,
+            contentType: attach.contentType
+          }
+          evidences.push(evid);
+        })
+      }
+
+      xrayTestData.evidence = evidences;
       this.testResults.tests!.push(xrayTestData);
     }
   }
 
   async onEnd() {
     // Update test Duration
-    this.testResults.info.finishDate = new Date(new Date(this.testResults.info.startDate).getTime() + this.totalDuration).toISOString();
-
+    this.testResults?.info?.finishDate != new Date(new Date(this.testResults?.info?.startDate!).getTime() + this.totalDuration).toISOString();
     if (typeof this.testResults != 'undefined' && typeof this.testResults.tests != 'undefined' && this.testResults.tests.length > 0) {
       await this.xrayService.createRun(this.testResults);
     } else {
