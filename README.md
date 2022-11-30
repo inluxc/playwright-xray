@@ -80,12 +80,32 @@ test('[J79] basic test', async ({ page }) => {
 Then run your tests with `npx playwright test` command and you'll see the result in console:
 
 ```sh
-✅ Test cycle JARV-C2901 has been created
+-------------------------------------
+ 
+✅ Test status: PROJ-104
+✅ Tests ran: 4
+✅ Tests passed: 1
+✅ Tests failed: 3
+✅ Tests todo: 0
+ 
+-------------------------------------
+ 
+✅ Test cycle PROJ-104 has been created
 👇 Check out the test result
-🔗 https://jira.your-company-domain.com/browser/JARV-C2901
+🔗 https://diller.atlassian.net/browse/PROJ-104
+ 
+-------------------------------------
 ```
 
 And you'll see the result in the Xray:
+
+![alt text](./assets/xray-result.png)
+
+
+## Notes
+
+- To have the steps imported you have to create then in the test issue itself.
+The steps will be imported by order of execution and inserted into the test.
 
 ## License
 

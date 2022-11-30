@@ -41,4 +41,3 @@ export interface XrayTestEvidence {
   filename: string,
   contentType: string
 };
-

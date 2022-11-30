@@ -1,8 +1,8 @@
 import { XrayOptions } from '../types/xray.types';
-import { XrayTestResult } from '../types/cloud.types';
+import { Execution } from '../types/cloud.types';
 import axios, { Axios, AxiosError } from 'axios';
 import { inspect } from 'util';
-import { bold, green } from 'picocolors';
+import { blue, bold, green, red, yellow } from 'picocolors';
 
 function isAxiosError(error: any): error is AxiosError {
   return error.isAxiosError === true;
@@ -105,20 +105,48 @@ export class XrayService {
     if (!options.testPlan) throw new Error('"testPlan" option are missed. Please provide them in the config');
   }
 
-  async createRun(results: XrayTestResult) {
+  async createRun(results: Execution) {
     const URL = `${this.requestUrl}/import/execution`;
+    const total = results.tests.length;
+    let passed = 0;
+    let failed = 0;
+    let todo = 0;
+
+
+    results.tests!.forEach((test: { status: any; }) => {
+      switch (test.status) {
+        case 'PASSED':
+          passed = passed + 1;
+          break;
+        case 'FAILED':
+          failed = failed + 1;
+          break;
+      }
+    });
 
     try {
       const response = await this.axios.post(URL, JSON.stringify(results));
       if (response.status !== 200) throw new Error(`${response.status} - Failed to create test cycle`);
-
       const {
-        data: { key, id },
+        data: { key },
       } = response;
 
-      console.log(`${bold(green(`✅ Test cycle ${key} has been created`))}`);
-      console.log(`${bold(green('👇 Check out the test result'))}`);
-      console.log(`${bold(green(`🔗 ${this.jira}/browse/${id}`))}`);
+      // Results
+      console.log(`${bold(blue(`-------------------------------------`))}`);
+      console.log(`${bold(blue(` `))}`);
+      console.log(`${bold(blue(`✅ Test status: ${key}`))}`);
+      console.log(`${bold(blue(`✅ Tests ran: ${total}`))}`);
+      console.log(`${bold(green(`✅ Tests passed: ${passed}`))}`);
+      console.log(`${bold(red(`✅ Tests failed: ${failed}`))}`);
+      console.log(`${bold(blue(` `))}`);
+      console.log(`${bold(blue(`-------------------------------------`))}`);
+      console.log(`${bold(blue(` `))}`);
+      console.log(`${bold(blue(`✅ Test cycle ${key} has been created`))}`);
+      console.log(`${bold(blue('👇 Check out the test result'))}`);
+      console.log(`${bold(blue(`🔗 ${this.jira}/browse/${key}`))}`);
+      console.log(`${bold(blue(` `))}`);
+      console.log(`${bold(blue(`-------------------------------------`))}`);
+
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(`Config: ${inspect(error.config)}`);
