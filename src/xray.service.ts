@@ -148,12 +148,11 @@ export class XrayService {
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
 
-      if(this.debug){
+      if (this.debug) {
         fs.writeFile('xray-payload.json', JSON.stringify(results), (err) => {
           if (err) throw err;
         });
       }
-
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(`Config: ${inspect(error.config)}`);
