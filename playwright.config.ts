@@ -17,7 +17,8 @@ const config: PlaywrightTestConfig = {
       password: ''
     },
     projectKey: 'CODE',
-    testPlan: 'CODE-1820'
+    testPlan: 'CODE-1820',
+    debug: false
   }]],
   use: {
       screenshot: 'only-on-failure'

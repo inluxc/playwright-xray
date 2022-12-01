@@ -3,6 +3,7 @@ import { XrayTestResult } from '../types/cloud.types';
 import axios, { Axios, AxiosError } from 'axios';
 import { inspect } from 'util';
 import { blue, bold, green, red } from 'picocolors';
+import * as fs from 'fs';
 
 function isAxiosError(error: any): error is AxiosError {
   return error.isAxiosError === true;
@@ -15,6 +16,7 @@ export class XrayService {
   private readonly password: string;
   private readonly type: string;
   private readonly requestUrl: string;
+  private readonly debug: boolean;
   private axios: Axios;
 
   constructor(options: XrayOptions) {
@@ -23,6 +25,7 @@ export class XrayService {
     this.username = '';
     this.password = '';
     this.requestUrl = '';
+    this.debug = options.debug;
 
     // Set Jira URL
     if (!options.jira.url) throw new Error('"jira.url" option is missed. Please, provide it in the config');
@@ -144,6 +147,13 @@ export class XrayService {
       console.log(`${bold(blue(`🔗 ${this.jira}/browse/${key}`))}`);
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
+
+      if(this.debug){
+        fs.writeFile('xray-payload.json', JSON.stringify(results), (err) => {
+          if (err) throw err;
+        });
+      }
+
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(`Config: ${inspect(error.config)}`);
