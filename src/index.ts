@@ -1,4 +1,6 @@
 import type { XrayTestResult, XrayTestSteps, XrayTestEvidence, XrayTest } from '../types/cloud.types';
+import { XrayCloudStatus } from '../types/cloud.types';
+import { XrayServerStatus } from '../types/server.types';
 import type { XrayOptions } from '../types/xray.types';
 import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 import * as fs from 'fs';
@@ -22,8 +24,8 @@ class XrayReporter implements Reporter {
     const testResults: XrayTestResult = {
       info: {
         summary: this.defaultRunName,
-        startDate: new Date().toISOString(),
-        finishDate: new Date().toISOString(),
+        startDate: this.getFormatData(new Date()),
+        finishDate: this.getFormatData(new Date()),
         testPlanKey: this.options.testPlan,
         revision: '2536',
       },
@@ -43,9 +45,9 @@ class XrayReporter implements Reporter {
 
       let xrayTestData: XrayTest = {
         testKey: testCode,
-        status: result.status.toUpperCase(),
-        start: result.startTime.toISOString(),
-        finish: finishTime.toISOString(),
+        status: this.convertPwStatusToXray(result.status),
+        start: this.getFormatData(result.startTime),
+        finish: this.getFormatData(finishTime),
         steps: [] as XrayTestSteps[],
       };
 
@@ -63,7 +65,7 @@ class XrayReporter implements Reporter {
             }
 
             const xrayTestStep: XrayTestSteps = {
-              status: typeof step.error == 'object' ? 'FAILED' : 'PASSED',
+              status: typeof step.error == 'object' ? this.convertPwStatusToXray('failed') : this.convertPwStatusToXray('passed'),
               comment: typeof step.error == 'object' ? errorMessage : '',
               actualResult: dataReceived,
             };
@@ -95,12 +97,48 @@ class XrayReporter implements Reporter {
   async onEnd() {
     // Update test Duration
     this.testResults?.info?.finishDate !=
-      new Date(new Date(this.testResults?.info?.startDate!).getTime() + this.totalDuration).toISOString();
+      this.getFormatData(new Date(new Date(this.testResults?.info?.startDate!).getTime() + this.totalDuration));
     if (typeof this.testResults != 'undefined' && typeof this.testResults.tests != 'undefined' && this.testResults.tests.length > 0) {
       await this.xrayService.createRun(this.testResults);
     } else {
       console.log(`There are no tests with such ${this.testCaseKeyPattern} key pattern`);
     }
+  }
+
+  convertPwStatusToXray(status: string): string {
+    switch (this.options.jira.type) {
+      case 'cloud':
+        return XrayCloudStatus[status];
+      case 'server':
+        return XrayServerStatus[status];
+      default:
+        return '';
+    }
+  }
+
+  getFormatData(date: Date) {
+    if (this.options.jira.type === 'cloud') {
+      return date.toISOString();
+    } else {
+      let timezone = date.getTimezoneOffset().toString();
+      return (
+        date.getFullYear() +
+        '-' +
+        date.getMonth() +
+        '-' +
+        date.getDay() +
+        'T' +
+        date.getHours() +
+        ':' +
+        date.getMinutes() +
+        ':' +
+        date.getSeconds() +
+        '+' +
+        (timezone.length == 1 ? '0'+timezone : timezone) +
+        ':00'
+      );
+    }
+    
   }
 }
 

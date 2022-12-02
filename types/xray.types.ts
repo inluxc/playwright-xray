@@ -8,9 +8,7 @@ export interface XrayOptions {
         client_secret?: string;
     },
     server?: {
-        url: string,
-        username: string,
-        password: string
+        token: string
     }
     projectKey: string;
     testPlan: string;

@@ -14,9 +14,10 @@ export class XrayService {
   private readonly jira: string;
   private readonly username: string;
   private readonly password: string;
+  private readonly token: string;
   private readonly type: string;
   private readonly requestUrl: string;
-  private readonly debug: boolean;
+  private readonly options: XrayOptions;
   private axios: Axios;
 
   constructor(options: XrayOptions) {
@@ -24,8 +25,9 @@ export class XrayService {
     this.xray = '';
     this.username = '';
     this.password = '';
+    this.token = '';
     this.requestUrl = '';
-    this.debug = options.debug;
+    this.options = options;
 
     // Set Jira URL
     if (!options.jira.url) throw new Error('"jira.url" option is missed. Please, provide it in the config');
@@ -75,26 +77,23 @@ export class XrayService {
 
       case 'server':
         // Set Xray Server URL
-        if (!options.server?.url) throw new Error('"host" option is missed. Please, provide it in the config');
-        this.xray = options.server?.url;
+        if (!options.jira?.url) throw new Error('"host" option is missed. Please, provide it in the config');
+        this.xray = options.jira?.url;
 
         // Set Xray Credencials
-        if (!options.server?.username || !options.server?.password)
-          throw new Error('"server.username" and/or "server.password" options are missed. Please provide them in the config');
-        this.username = options.server?.username;
-        this.password = options.server?.password;
+        if (!options.server?.token)
+          throw new Error('"server.token" option is missing. Please provide them in the config');
+        this.token = options.server?.token;
 
         // Set Request URL
-        this.requestUrl = this.xray + 'rest/raven/2.0/api';
+        this.requestUrl = this.xray + 'rest/raven/1.0';
 
         //Create Axios Instance with Auth
-        const token = `${this.username}:${this.password}`;
-        const encodedToken = Buffer.from(token).toString('base64');
         this.axios = axios.create({
           baseURL: this.xray,
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Basic ${encodedToken}`,
+            Authorization: `Bearer ${this.token}`,
           },
         });
 
@@ -116,10 +115,10 @@ export class XrayService {
 
     results.tests!.forEach((test: { status: any }) => {
       switch (test.status) {
-        case 'PASSED':
+        case 'PASSED', 'PASS':
           passed = passed + 1;
           break;
-        case 'FAILED':
+        case 'FAILED', 'FAIL':
           failed = failed + 1;
           break;
       }
@@ -128,14 +127,15 @@ export class XrayService {
     try {
       const response = await this.axios.post(URL, JSON.stringify(results));
       if (response.status !== 200) throw new Error(`${response.status} - Failed to create test cycle`);
-      const {
-        data: { key },
-      } = response;
+      let key = response.data.key;
+      if (this.options.jira.type === 'server') {
+        key = response.data.testExecIssue.key;
+      }
 
       // Results
       console.log(`${bold(blue(`-------------------------------------`))}`);
       console.log(`${bold(blue(` `))}`);
-      console.log(`${bold(blue(`✅ Test status: ${key}`))}`);
+      console.log(`${bold(blue(`✅ Test plan: ${this.options.testPlan}`))}`);
       console.log(`${bold(blue(`✅ Tests ran: ${total}`))}`);
       console.log(`${bold(green(`✅ Tests passed: ${passed}`))}`);
       console.log(`${bold(red(`✅ Tests failed: ${failed}`))}`);
@@ -144,11 +144,11 @@ export class XrayService {
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`✅ Test cycle ${key} has been created`))}`);
       console.log(`${bold(blue('👇 Check out the test result'))}`);
-      console.log(`${bold(blue(`🔗 ${this.jira}/browse/${key}`))}`);
+      console.log(`${bold(blue(`🔗 ${this.jira}browse/${key}`))}`);
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
 
-      if (this.debug) {
+      if (this.options.debug) {
         fs.writeFile('xray-payload.json', JSON.stringify(results), (err) => {
           if (err) throw err;
         });
