@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('[DS-1790] another test', async ({ page, browserName }) => {
+test('[XRAYISSUE-1] another test', async ({ page, browserName }) => {
   test.skip(browserName === 'webkit');
 
   await page.goto('https://playwright.dev/');
@@ -12,7 +12,7 @@ test('[DS-1790] another test', async ({ page, browserName }) => {
   await expect(title).toHaveText('Playwright');
 });
 
-test('[DS-1837] another test', async ({ page, browserName }) => {
+test('[XRAYISSUE-2] another test', async ({ page, browserName }) => {
   test.skip(browserName === 'webkit');
 
   await page.goto('https://playwright.dev/');
