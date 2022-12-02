@@ -134,11 +134,10 @@ class XrayReporter implements Reporter {
         ':' +
         date.getSeconds() +
         '+' +
-        (timezone.length == 1 ? '0'+timezone : timezone) +
+        (timezone.length == 1 ? '0' + timezone : timezone) +
         ':00'
       );
     }
-    
   }
 }
 

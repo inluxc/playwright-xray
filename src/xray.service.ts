@@ -81,8 +81,7 @@ export class XrayService {
         this.xray = options.jira?.url;
 
         // Set Xray Credencials
-        if (!options.server?.token)
-          throw new Error('"server.token" option is missing. Please provide them in the config');
+        if (!options.server?.token) throw new Error('"server.token" option is missing. Please provide them in the config');
         this.token = options.server?.token;
 
         // Set Request URL
@@ -115,10 +114,10 @@ export class XrayService {
 
     results.tests!.forEach((test: { status: any }) => {
       switch (test.status) {
-        case 'PASSED', 'PASS':
+        case ('PASSED', 'PASS'):
           passed = passed + 1;
           break;
-        case 'FAILED', 'FAIL':
+        case ('FAILED', 'FAIL'):
           failed = failed + 1;
           break;
       }
