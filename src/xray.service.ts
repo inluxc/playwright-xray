@@ -114,12 +114,12 @@ export class XrayService {
 
     results.tests!.forEach((test: { status: any }) => {
       switch (test.status) {
-        case ('PASS'):
-        case ('PASSED'):
+        case 'PASS':
+        case 'PASSED':
           passed = passed + 1;
           break;
-        case ('FAIL'):
-        case ('FAILED'):
+        case 'FAIL':
+        case 'FAILED':
           failed = failed + 1;
           break;
       }
