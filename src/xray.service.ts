@@ -1,5 +1,5 @@
-import { XrayOptions } from '../types/xray.types';
-import { XrayTestResult } from '../types/cloud.types';
+import { XrayOptions } from './types/xray.types';
+import { XrayTestResult } from './types/cloud.types';
 import axios, { Axios, AxiosError } from 'axios';
 import { inspect } from 'util';
 import { blue, bold, green, red } from 'picocolors';
@@ -114,10 +114,12 @@ export class XrayService {
 
     results.tests!.forEach((test: { status: any }) => {
       switch (test.status) {
-        case ('PASSED', 'PASS'):
+        case ('PASS'):
+        case ('PASSED'):
           passed = passed + 1;
           break;
-        case ('FAILED', 'FAIL'):
+        case ('FAIL'):
+        case ('FAILED'):
           failed = failed + 1;
           break;
       }
