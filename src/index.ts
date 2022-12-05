@@ -1,7 +1,7 @@
-import type { XrayTestResult, XrayTestSteps, XrayTestEvidence, XrayTest } from '../types/cloud.types';
-import { XrayCloudStatus } from '../types/cloud.types';
-import { XrayServerStatus } from '../types/server.types';
-import type { XrayOptions } from '../types/xray.types';
+import type { XrayTestResult, XrayTestSteps, XrayTestEvidence, XrayTest } from './types/cloud.types';
+import { XrayCloudStatus } from './types/cloud.types';
+import { XrayServerStatus } from './types/server.types';
+import type { XrayOptions } from './types/xray.types';
 import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
