@@ -2,10 +2,10 @@
   "name": "playwright-xray",
   "version": "0.3.1",
   "description": "XRAY reporter for the Playwright",
-  "main": "lib/src/index.js",
-  "types": "lib/src/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
-    "lib/src"
+    "lib"
   ],
   "scripts": {
     "prepare": "npm run build",
