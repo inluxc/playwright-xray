@@ -49,30 +49,37 @@ class XrayReporter implements Reporter {
         start: this.getFormatData(result.startTime),
         finish: this.getFormatData(finishTime),
         steps: [] as XrayTestSteps[],
+        comment: ''
       };
 
-      await Promise.all(
-        result.steps.map(async (step) => {
-          if (step.category != 'hook') {
-            // Add Step to request
-            const errorMessage = step.error?.stack
-              ?.toString()
-              ?.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
-            const received = this.receivedRegEx.exec(errorMessage!);
-            let dataReceived = '';
-            if (received?.[1] !== undefined) {
-              dataReceived = received?.[1];
-            }
+      // Set Test Error
+      if (result.errors.length > 0) {
+        xrayTestData.comment = JSON.stringify(result.errors);
+      } else {
 
-            const xrayTestStep: XrayTestSteps = {
-              status: typeof step.error == 'object' ? this.convertPwStatusToXray('failed') : this.convertPwStatusToXray('passed'),
-              comment: typeof step.error == 'object' ? errorMessage : '',
-              actualResult: dataReceived,
-            };
-            xrayTestData.steps!.push(xrayTestStep);
-          }
-        }),
-      );
+        await Promise.all(
+          result.steps.map(async (step) => {
+            if (step.category != 'hook') {
+              // Add Step to request
+              const errorMessage = step.error?.stack
+                ?.toString()
+                ?.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+              const received = this.receivedRegEx.exec(errorMessage!);
+              let dataReceived = '';
+              if (received?.[1] !== undefined) {
+                dataReceived = received?.[1];
+              }
+
+              const xrayTestStep: XrayTestSteps = {
+                status: typeof step.error == 'object' ? this.convertPwStatusToXray('failed') : this.convertPwStatusToXray('passed'),
+                comment: typeof step.error == 'object' ? errorMessage : '',
+                actualResult: dataReceived,
+              };
+              xrayTestData.steps!.push(xrayTestStep);
+            }
+          }),
+        );
+      }
 
       // Get evidences from test results (video, images, text)
       const evidences: XrayTestEvidence[] = [];

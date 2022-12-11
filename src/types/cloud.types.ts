@@ -35,6 +35,7 @@ export interface XrayTest {
   evidence?: XrayTestEvidence[];
   steps?: XrayTestSteps[];
   defects?: object;
+  comment: string;
 }
 
 export interface XrayTestSteps {
