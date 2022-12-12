@@ -92,7 +92,7 @@ Then run your tests with `npx playwright test` command and you'll see the result
  
 ✅ Test cycle PROJ-104 has been created
 👇 Check out the test result
-🔗 https://diller.atlassian.net/browse/PROJ-104
+🔗 https://[company].atlassian.net/browse/PROJ-104
  
 -------------------------------------
 ```
