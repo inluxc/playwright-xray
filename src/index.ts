@@ -49,14 +49,13 @@ class XrayReporter implements Reporter {
         start: this.getFormatData(result.startTime),
         finish: this.getFormatData(finishTime),
         steps: [] as XrayTestSteps[],
-        comment: ''
+        comment: '',
       };
 
       // Set Test Error
       if (result.errors.length > 0) {
         xrayTestData.comment = JSON.stringify(result.errors);
       } else {
-
         await Promise.all(
           result.steps.map(async (step) => {
             if (step.category != 'hook') {
