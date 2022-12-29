@@ -5,6 +5,7 @@ import type { XrayOptions } from './types/xray.types';
 import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
+import { bold, green, red, yellow } from 'picocolors';
 
 import { XrayService } from './xray.service';
 
@@ -97,6 +98,21 @@ class XrayReporter implements Reporter {
 
       xrayTestData.evidence = evidences;
       this.testResults.tests!.push(xrayTestData);
+
+      switch (this.convertPwStatusToXray(result.status)) {
+        case 'PASS':
+        case 'PASSED':
+          console.log(`${bold(green(`✅ ${testCase.title}`))}`);
+          break;
+        case 'FAIL':
+        case 'FAILED':
+          console.log(`${bold(red(`⛔ ${testCase.title}`))}`);
+          break;
+        case 'SKIPPED':
+        case 'ABORTED':
+          console.log(`${bold(yellow(`🚫 ${testCase.title}`))}`);
+          break;
+      }
     }
   }
 
