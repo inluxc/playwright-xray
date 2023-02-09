@@ -4,8 +4,8 @@ export const XrayServerStatus: XrayServerStatusType = {
   passed: 'PASS',
   failed: 'FAIL',
   skipped: 'SKIPPED',
-  timedOut: 'TIMEDOUT',
-  interrupted: 'INTERRUPTED',
+  timedOut: 'FAIL',
+  interrupted: 'ABORTED',
 };
 
 export interface XrayJsonImportExecution {

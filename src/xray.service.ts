@@ -126,7 +126,17 @@ export class XrayService {
     });
 
     try {
-      const response = await this.axios.post(URL, JSON.stringify(results));
+      if (this.options.debug) {
+        fs.writeFile('xray-payload.json', JSON.stringify(results), (err) => {
+          if (err) throw err;
+        });
+      }
+
+      const response = await this.axios.post(URL, JSON.stringify(results), {
+        maxBodyLength: 107374182400, //100gb
+        maxContentLength: 107374182400, //100gb
+        timeout: 600000, //10min
+      });
       if (response.status !== 200) throw new Error(`${response.status} - Failed to create test cycle`);
       let key = response.data.key;
       if (this.options.jira.type === 'server') {
@@ -148,12 +158,6 @@ export class XrayService {
       console.log(`${bold(blue(`🔗 ${this.jira}browse/${key}`))}`);
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
-
-      if (this.options.debug) {
-        fs.writeFile('xray-payload.json', JSON.stringify(results), (err) => {
-          if (err) throw err;
-        });
-      }
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(`Config: ${inspect(error.config)}`);

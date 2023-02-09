@@ -4,8 +4,8 @@ export const XrayCloudStatus: XrayCloudStatusType = {
   passed: 'PASSED',
   failed: 'FAILED',
   skipped: 'SKIPPED',
-  timedOut: 'TIMEDOUT',
-  interrupted: 'INTERRUPTED',
+  timedOut: 'FAILED',
+  interrupted: 'ABORTED',
 };
 
 export interface XrayTestResult {
