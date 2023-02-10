@@ -43,7 +43,7 @@ const config: PlaywrightTestConfig = {
 
 ### Server version
 
-Authenticate with `usernam` and `password` key.
+Authenticate with `username` and `password` key.
 
 ```typescript
 // playwright.config.ts
@@ -56,9 +56,7 @@ const config: PlaywrightTestConfig = {
       type: 'server'
     },
     server: {
-      url: 'https://sandbox.xpand-it.com/rest/raven/2.0/api',
-      username: '',
-      password: ''
+      token: 'YOUR_SERVER_TOKEN'
     },
     projectKey: 'JIRA_CODE',
     testPlan: 'JIRA_CODEXXXXX'
@@ -100,6 +98,50 @@ Then run your tests with `npx playwright test` command and you'll see the result
 And you'll see the result in the Xray:
 
 ![alt text](./assets/xray-result.png)
+
+
+## Multiple Test Plans
+
+If you need to send report for more than one test plan, you need to create a config file for each test plan.
+Create a folder (e.g. configs) in your project and for each test plan, create a new playwright config file in this folder.
+
+``` ts
+// configs/TCK-87.config.ts
+
+import { PlaywrightTestConfig } from "@playwright/test";
+import base from "../playwright.config";
+
+const config: PlaywrightTestConfig = {
+	...base,
+	testDir: "../tests",
+	use: {
+		...base.use,
+		headless: true,
+	},
+	reporter: [
+		[
+			"playwright-xray",
+			{
+				jira: {
+          url: 'https://your-jira-url',
+          type: 'server'
+				},
+				server: {
+					token: 'YOUR_SERVER_TOKEN',
+				},
+        projectKey: 'TCK',
+        testPlan: 'TCK-87'
+			},
+		],
+	],
+};
+export default config;
+```
+Now you can choose which config file you want to use executing the tests, using the command below:
+```
+npx playwright test --config=configs/TCK-87.config.ts
+```
+If no config file is chosen, the default config file "playwright.config.ts" will be used.
 
 
 ## Notes
