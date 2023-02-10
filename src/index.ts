@@ -6,6 +6,7 @@ import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
 import { bold, green, red, yellow } from 'picocolors';
+import dayjs from 'dayjs';
 
 import { XrayService } from './xray.service';
 
@@ -142,23 +143,8 @@ class XrayReporter implements Reporter {
     if (this.options.jira.type === 'cloud') {
       return date.toISOString();
     } else {
-      let timezone = date.getTimezoneOffset().toString();
-      return (
-        date.getFullYear() +
-        '-' +
-        date.getMonth() +
-        '-' +
-        date.getDay() +
-        'T' +
-        date.getHours() +
-        ':' +
-        date.getMinutes() +
-        ':' +
-        date.getSeconds() +
-        '+' +
-        (timezone.length == 1 ? '0' + timezone : timezone) +
-        ':00'
-      );
+      const d = dayjs(date)
+      return a.format();
     }
   }
 }
