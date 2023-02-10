@@ -41,7 +41,6 @@ class XrayReporter implements Reporter {
     const testCode: string = testCaseId != null ? testCaseId[1]! : '';
     if (testCode != '') {
       // @ts-ignore
-      const browserName = testCase._pool.registrations.get('browserName').fn;
       const finishTime = new Date(result.startTime.getTime() + result.duration);
       this.totalDuration = this.totalDuration + result.duration;
 
@@ -120,7 +119,7 @@ class XrayReporter implements Reporter {
   async onEnd() {
     // Update test Duration
     this.testResults?.info?.finishDate !=
-      this.getFormatData(new Date(new Date(this.testResults?.info?.startDate!).getTime() + this.totalDuration));
+      this.getFormatData(new Date(new Date((this.testResults && this.testResults.info ? this.testResults.info.startDate : undefined)!).getTime() + this.totalDuration));
     if (typeof this.testResults != 'undefined' && typeof this.testResults.tests != 'undefined' && this.testResults.tests.length > 0) {
       await this.xrayService.createRun(this.testResults);
     } else {
@@ -143,8 +142,8 @@ class XrayReporter implements Reporter {
     if (this.options.jira.type === 'cloud') {
       return date.toISOString();
     } else {
-      const d = dayjs(date)
-      return a.format();
+      const d = dayjs(date);
+      return d.format();
     }
   }
 }
