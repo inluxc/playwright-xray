@@ -37,6 +37,7 @@
   "homepage": "https://github.com/inluxc/playwright-xray#readme",
   "devDependencies": {
     "@playwright/test": "^1.30.0",
+    "playwright-xray": "^0.4.0",
     "prettier": "^2.5.1",
     "release-it": "^15.5.0",
     "typescript": "^4.5.4"
