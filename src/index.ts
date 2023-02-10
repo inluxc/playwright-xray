@@ -119,7 +119,12 @@ class XrayReporter implements Reporter {
   async onEnd() {
     // Update test Duration
     this.testResults?.info?.finishDate !=
-      this.getFormatData(new Date(new Date((this.testResults && this.testResults.info ? this.testResults.info.startDate : undefined)!).getTime() + this.totalDuration));
+      this.getFormatData(
+        new Date(
+          new Date((this.testResults && this.testResults.info ? this.testResults.info.startDate : undefined)!).getTime() +
+            this.totalDuration,
+        ),
+      );
     if (typeof this.testResults != 'undefined' && typeof this.testResults.tests != 'undefined' && this.testResults.tests.length > 0) {
       await this.xrayService.createRun(this.testResults);
     } else {
