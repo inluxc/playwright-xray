@@ -43,7 +43,7 @@ const config: PlaywrightTestConfig = {
 
 ### Server version
 
-Authenticate with `username` and `password` key.
+Authenticate with `token` key.
 
 ```typescript
 // playwright.config.ts
