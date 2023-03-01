@@ -12,6 +12,6 @@ export interface XrayOptions {
     }
     projectKey: string;
     testPlan: string;
-    testExecution: string;
+    testExecution?: string;
     debug: boolean;
 }
