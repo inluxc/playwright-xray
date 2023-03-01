@@ -29,6 +29,7 @@ class XrayReporter implements Reporter {
         startDate: this.getFormatData(new Date()),
         finishDate: this.getFormatData(new Date()),
         testPlanKey: this.options.testPlan,
+        testExecutionKey: this.options.testExecution,
         revision: '2536',
       },
       tests: [] as XrayTest[],

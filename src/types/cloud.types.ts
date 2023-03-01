@@ -23,6 +23,7 @@ export interface XrayInfo {
   startDate: string;
   finishDate: string;
   testPlanKey: string;
+  testExecutionKey?: string;
   testEnvironments?: object;
 }
 
