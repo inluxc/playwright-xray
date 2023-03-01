@@ -24,12 +24,12 @@ class XrayReporter implements Reporter {
     this.xrayService = new XrayService(this.options);
     this.totalDuration = 0;
     const testResults: XrayTestResult = {
+      testExecutionKey: this.options.testExecution,
       info: {
         summary: this.defaultRunName,
         startDate: this.getFormatData(new Date()),
         finishDate: this.getFormatData(new Date()),
         testPlanKey: this.options.testPlan,
-        testExecutionKey: this.options.testExecution,
         revision: '2536',
       },
       tests: [] as XrayTest[],
