@@ -31,10 +31,10 @@ const config: PlaywrightTestConfig = {
       url: 'https://your-jira-url',
       type: 'cloud'
     },
-    xray: {
+    cloud: {
       client_id: '',
       client_secret: '',
-    }
+    },
     projectKey: 'JIRA_CODE',
     testPlan: 'JIRA_CODEXXXXX'
   }]],

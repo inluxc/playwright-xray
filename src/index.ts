@@ -24,6 +24,7 @@ class XrayReporter implements Reporter {
     this.xrayService = new XrayService(this.options);
     this.totalDuration = 0;
     const testResults: XrayTestResult = {
+      testExecutionKey: this.options.testExecution,
       info: {
         summary: this.defaultRunName,
         startDate: this.getFormatData(new Date()),
