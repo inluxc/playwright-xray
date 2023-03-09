@@ -40,6 +40,13 @@ export class XrayService {
     // Init axios instance
     this.axios = axios;
 
+    this.axios.defaults.headers.options = {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    };
+    
+
     switch (this.type) {
       case 'cloud':
         // Set Xray Server URL
@@ -131,11 +138,12 @@ export class XrayService {
           if (err) throw err;
         });
       }
-
+      
       const response = await this.axios.post(URL, JSON.stringify(results), {
         maxBodyLength: 107374182400, //100gb
         maxContentLength: 107374182400, //100gb
         timeout: 600000, //10min
+        proxy: (this.options.proxy !== undefined ? this.options.proxy : false)
       });
       if (response.status !== 200) throw new Error(`${response.status} - Failed to create test cycle`);
       let key = response.data.key;

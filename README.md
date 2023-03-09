@@ -108,9 +108,45 @@ const config: PlaywrightTestConfig = {
   }]],
 }
 ```
-> If you set the `testExecution`, a new test execution ticket is not created.
-> 
-> The `testExecution` and the `version` must exist in your project.
+
+### Proxy
+If you use a proxy to access Jira, you need to configure the proxy. This proxy information will be used by Axios to send the results to Jira.
+```typescript
+// playwright.config.ts
+import { PlaywrightTestConfig } from '@playwright/test';
+
+const config: PlaywrightTestConfig = {
+  reporter: [['playwright-xray', { 
+    jira: {
+      url: 'https://your-jira-url',
+      type: 'server'
+    },
+    cloud: {
+      client_id: '',
+      client_secret: '',
+    },
+    server: {
+      token: ''
+    },
+    projectKey: 'JIRA_CODE',
+    testPlan: 'JIRA_CODE-XXX',
+    debug: false,
+    // Optional
+    proxy: {
+      protocol: 'http',
+      host: '0.0.0.0',
+      port: 80,
+      auth: {
+        username: 'USER',
+        password: 'p@$$w0Rd'
+      }
+    }
+  }]],
+}
+```
+> If your proxy server doesn't need authentication, just omit the `auth` part.
+>
+> If no proxy is configured, Axios is forced to doesn't use proxy.
 
 ### Execution
 
