@@ -36,7 +36,8 @@ const config: PlaywrightTestConfig = {
       client_secret: '',
     },
     projectKey: 'JIRA_CODE',
-    testPlan: 'JIRA_CODEXXXXX'
+    testPlan: 'JIRA_CODEXXXXX',
+    debug: false
   }]],
 }
 ```
@@ -59,7 +60,8 @@ const config: PlaywrightTestConfig = {
       token: 'YOUR_SERVER_TOKEN'
     },
     projectKey: 'JIRA_CODE',
-    testPlan: 'JIRA_CODEXXXXX'
+    testPlan: 'JIRA_CODEXXXXX',
+    debug: false
   }]],
 }
 ```
@@ -74,6 +76,43 @@ test('[J79] basic test', async ({ page }) => {
   await expect(title).toHaveText('Playwright');
 });
 ```
+
+### Optional config
+Is it possible to add some optional values to the Test Execution ticket.
+```typescript
+// playwright.config.ts
+import { PlaywrightTestConfig } from '@playwright/test';
+
+const config: PlaywrightTestConfig = {
+  reporter: [['playwright-xray', { 
+    jira: {
+      url: 'https://your-jira-url',
+      type: 'server'
+    },
+    cloud: {
+      client_id: '',
+      client_secret: '',
+    },
+    server: {
+      token: ''
+    },
+    projectKey: 'JIRA_CODE',
+    testPlan: 'JIRA_CODE-XXX',
+    debug: false,
+    // Optional
+    testExecution: 'JIRA_CODE-YYY',
+    version: 'v1.0',
+    revision: '12345',
+    description: 'This test was executed automatically',
+    testEnvironments: ['dev', 'test'],
+  }]],
+}
+```
+> If you set the `testExecution`, a new test execution ticket is not created.
+> 
+> The `testExecution` and the `version` must exist in your project.
+
+### Execution
 
 Then run your tests with `npx playwright test` command and you'll see the result in console:
 
@@ -142,7 +181,6 @@ Now you can choose which config file you want to use executing the tests, using 
 npx playwright test --config=configs/TCK-87.config.ts
 ```
 If no config file is chosen, the default config file "playwright.config.ts" will be used.
-
 
 ## Notes
 

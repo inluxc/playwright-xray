@@ -5,7 +5,7 @@ import type { XrayOptions } from './types/xray.types';
 import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
-import { bold, green, red, yellow } from 'picocolors';
+import { blue, bold, green, red, yellow } from 'picocolors';
 import dayjs from 'dayjs';
 
 import { XrayService } from './xray.service';
@@ -30,11 +30,16 @@ class XrayReporter implements Reporter {
         startDate: this.getFormatData(new Date()),
         finishDate: this.getFormatData(new Date()),
         testPlanKey: this.options.testPlan,
-        revision: '2536',
+        revision: this.options.revision,
+        description: this.options.description,
+        testEnvironments: this.options.testEnvironments,
+        version: this.options.version,
       },
       tests: [] as XrayTest[],
     };
     this.testResults = testResults;
+    console.log(`${bold(blue(`-------------------------------------`))}`);
+    console.log(`${bold(blue(` `))}`);
   }
 
   async onTestEnd(testCase: TestCase, result: TestResult) {

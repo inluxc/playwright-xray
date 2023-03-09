@@ -144,6 +144,7 @@ export class XrayService {
       }
 
       // Results
+      console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`✅ Test plan: ${this.options.testPlan}`))}`);
