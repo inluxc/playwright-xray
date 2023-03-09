@@ -12,13 +12,10 @@ const config: PlaywrightTestConfig = {
       client_secret: '',
     },
     server: {
-      url: 'https://sandbox.xpand-it.com/rest/raven/2.0/api',
-      user: '',
-      password: ''
+      token: ''
     },
     projectKey: 'CODE',
     testPlan: 'CODE-1820',
-    testExecution: '',
     debug: false
   }]],
   use: {
