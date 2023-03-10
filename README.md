@@ -70,7 +70,7 @@ Also, your playwright tests should include unique ID inside square brackets `[J7
 
 ```typescript
 // Xray test case ID inside square brackets
-test('[J79] basic test', async ({ page }) => {
+test('J79 | basic test', async ({ page }) => {
   await page.goto('https://playwright.dev/');
   const title = page.locator('.navbar__inner .navbar__title');
   await expect(title).toHaveText('Playwright');
