@@ -13,7 +13,7 @@ import { XrayService } from './xray.service';
 class XrayReporter implements Reporter {
   private xrayService!: XrayService;
   private testResults!: XrayTestResult;
-  private testCaseKeyPattern = /\[(.*?)\]/;
+  private testCaseKeyPattern = /^(.*?) |$/;
   private receivedRegEx: RegExp = /Received string: "(.*?)"(?=\n)/;
   private options: XrayOptions;
   private totalDuration: number;
