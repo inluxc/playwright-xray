@@ -155,17 +155,36 @@ Then run your tests with `npx playwright test` command and you'll see the result
 ```sh
 -------------------------------------
  
-✅ Test status: PROJ-104
-✅ Tests ran: 4
-✅ Tests passed: 1
-✅ Tests failed: 3
-✅ Tests todo: 0
+🔸 Starting the run with 6 tests
+ 
+✅ Chrome | XRAYISSUE-2 | another test
+✅ Chrome | XRAYISSUE-1 | basic test
+✅ Firefox | XRAYISSUE-1 | basic test
+⛔ Chrome | XRAYISSUE-3 | another test
+⛔ Firefox | XRAYISSUE-2 | another test
+⛔ Firefox | XRAYISSUE-3 | another test
  
 -------------------------------------
  
-✅ Test cycle PROJ-104 has been created
+😀 Successfully sending test results to Jira
+ 
+🔸 Description:       Tests executed with playwright-xray plugin
+🔸 Test environments: dev,test
+🔸 Version:           3.5.2
+🔸 Revision:          12345
+🔸 Browsers:          Chrome, Firefox
+🔸 Test plan:         XRAYISSUE-123
+🔸 Test execution:    XRAYISSUE-324
+🔸 Test Duration:     25s 
+🔸 Tests ran:         6
+🔸 Tests passed:      3
+🔸 Tests failed:      3
+ 
+-------------------------------------
+ 
+🔸 Test cycle XRAYISSUE-324 has been updated
 👇 Check out the test result
-🔗 https://[company].atlassian.net/browse/PROJ-104
+🔗 https://jira.com/XRAYISSUE-324
  
 -------------------------------------
 ```
