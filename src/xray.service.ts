@@ -189,7 +189,7 @@ export class XrayService {
       console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test Duration:     ${this.help.convertMsToTime(duration)}`))}`);
       console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Tests ran:         ${total}`))}`);
       console.log(`${bold(yellow(`⏺  `))}${bold(green(`Tests passed:      ${passed}`))}`);
-      console.log(`${bold(yellow(`⏺  `))}${bold(red(`Tests failed:      ${failed}`))}`);      
+      console.log(`${bold(yellow(`⏺  `))}${bold(red(`Tests failed:      ${failed}`))}`);
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
       console.log(`${bold(blue(` `))}`);

@@ -27,21 +27,21 @@ class Help {
       return d.format();
     }
   }
-  
+
   convertMsToTime(milliseconds: number) {
     let seconds = Math.floor(milliseconds / 1000);
     let minutes = Math.floor(seconds / 60);
     let hours = Math.floor(minutes / 60);
-  
+
     seconds = seconds % 60;
     minutes = minutes % 60;
     hours = hours % 24;
-  
+
     let out = '';
 
-    out += (hours.toString() !== '0' ? hours.toString() + 'h ' : '')
-    out += (minutes.toString() !== '0' ? minutes.toString() + 'm ' : '')
-    out += (seconds.toString() !== '0' ? seconds.toString() + 's ' : '')
+    out += hours.toString() !== '0' ? hours.toString() + 'h ' : '';
+    out += minutes.toString() !== '0' ? minutes.toString() + 'm ' : '';
+    out += seconds.toString() !== '0' ? seconds.toString() + 's ' : '';
 
     return out;
   }
