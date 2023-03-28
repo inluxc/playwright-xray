@@ -2,7 +2,7 @@ import { XrayOptions } from './types/xray.types';
 import { XrayTestResult } from './types/cloud.types';
 import axios, { Axios, AxiosError } from 'axios';
 import { inspect } from 'util';
-import { blue, bold, green, red } from 'picocolors';
+import { blue, bold, green, red, yellow } from 'picocolors';
 import * as fs from 'fs';
 import Help from './help';
 import { ExecInfo } from './types/execInfo.types';
@@ -168,32 +168,32 @@ export class XrayService {
       console.log(`${bold(green(`😀 Successfully sending test results to Jira`))}`);
       console.log(`${bold(blue(` `))}`);
       if (this.options.description !== undefined) {
-        console.log(`${bold(blue(`🔸 Description:       ${this.options.description}`))}`);
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Description:       ${this.options.description}`))}`);
       }
       if (this.options.testEnvironments !== undefined) {
-        console.log(`${bold(blue(`🔸 Test environments: ${this.options.testEnvironments}`))}`);
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test environments: ${this.options.testEnvironments}`))}`);
       }
       if (this.options.version !== undefined) {
-        console.log(`${bold(blue(`🔸 Version:           ${this.options.version}`))}`);
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Version:           ${this.options.version}`))}`);
       }
       if (this.options.revision !== undefined) {
-        console.log(`${bold(blue(`🔸 Revision:          ${this.options.revision}`))}`);
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Revision:          ${this.options.revision}`))}`);
       }
       if (execInfo.browserName !== undefined) {
-        console.log(`${bold(blue(`🔸 Browsers:          ${execInfo.browserName}`))}`);
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Browsers:          ${execInfo.browserName}`))}`);
       }
-      console.log(`${bold(blue(`🔸 Test plan:         ${this.options.testPlan}`))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test plan:         ${this.options.testPlan}`))}`);
       if (this.options.testExecution !== undefined) {
-        console.log(`${bold(blue(`🔸 Test execution:    ${this.options.testExecution}`))}`);
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test execution:    ${this.options.testExecution}`))}`);
       }
-      console.log(`${bold(blue(`🔸 Test Duration:     ${this.help.convertMsToTime(duration)}`))}`);
-      console.log(`${bold(blue(`🔸 Tests ran:         ${total}`))}`);
-      console.log(`${bold(green(`🔸 Tests passed:      ${passed}`))}`);
-      console.log(`${bold(red(`🔸 Tests failed:      ${failed}`))}`);      
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test Duration:     ${this.help.convertMsToTime(duration)}`))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Tests ran:         ${total}`))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(green(`Tests passed:      ${passed}`))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(red(`Tests failed:      ${failed}`))}`);      
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
       console.log(`${bold(blue(` `))}`);
-      console.log(`${bold(blue(`🔸 Test cycle ${key} has been ${action}`))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test cycle ${key} has been ${action}`))}`);
       console.log(`${bold(blue('👇 Check out the test result'))}`);
       console.log(`${bold(blue(`🔗 ${this.jira}browse/${key}`))}`);
       console.log(`${bold(blue(` `))}`);
