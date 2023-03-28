@@ -1,6 +1,6 @@
 import type { XrayTestResult, XrayTestSteps, XrayTestEvidence, XrayTest } from './types/cloud.types';
 import type { XrayOptions } from './types/xray.types';
-import type { Reporter, TestCase, TestResult, FullResult, FullConfig, Suite } from '@playwright/test/reporter';
+import type { Reporter, TestCase, TestResult, FullConfig, Suite } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
 import { blue, bold, green, red, yellow } from 'picocolors';
