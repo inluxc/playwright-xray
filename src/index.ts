@@ -122,8 +122,9 @@ class XrayReporter implements Reporter {
       this.testResults.tests!.push(xrayTestData);
 
       let browser = '';
-      if (testCase.parent.parent !== undefined) {
-        browser = testCase.parent.parent?.title;
+      let tst: any = testCase;
+      if (tst._projectId !== undefined) {
+        browser = tst._projectId;
         browser = browser.charAt(0).toUpperCase() + browser.slice(1) + ' | ';
       }
 
