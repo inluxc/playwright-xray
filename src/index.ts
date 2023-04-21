@@ -121,24 +121,25 @@ class XrayReporter implements Reporter {
       xrayTestData.evidence = evidences;
       this.testResults.tests!.push(xrayTestData);
 
-      let browser = '';
-      if (testCase.parent.parent !== undefined) {
-        browser = testCase.parent.parent?.title;
-        browser = browser.charAt(0).toUpperCase() + browser.slice(1) + ' | ';
+      let projectID = '';
+      let tst: any = testCase;
+      if (tst._projectId !== undefined) {
+        projectID = tst._projectId;
+        projectID = projectID.charAt(0).toUpperCase() + projectID.slice(1) + ' | ';
       }
 
       switch (this.help.convertPwStatusToXray(result.status)) {
         case 'PASS':
         case 'PASSED':
-          console.log(`${bold(green(`✅ ${browser}${testCase.title}`))}`);
+          console.log(`${bold(green(`✅ ${projectID}${testCase.title}`))}`);
           break;
         case 'FAIL':
         case 'FAILED':
-          console.log(`${bold(red(`⛔ ${browser}${testCase.title}`))}`);
+          console.log(`${bold(red(`⛔ ${projectID}${testCase.title}`))}`);
           break;
         case 'SKIPPED':
         case 'ABORTED':
-          console.log(`${bold(yellow(`🚫 ${browser}${testCase.title}`))}`);
+          console.log(`${bold(yellow(`🚫 ${projectID}${testCase.title}`))}`);
           break;
       }
     }
