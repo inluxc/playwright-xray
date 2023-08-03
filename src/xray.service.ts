@@ -106,6 +106,8 @@ export class XrayService {
           },
         });
 
+        if (!options.project) throw new Error('"project" option is missed, server version of Xray needs it. Please, provide it in the config');
+
         break;
     }
 
@@ -157,10 +159,8 @@ export class XrayService {
         key = response.data.testExecIssue.key;
       }
 
-      let action = 'created';
-      if (this.options.testExecution !== undefined) {
-        action = 'updated';
-      }
+      let action = this.options.testExecution !== undefined ? 'updated' : 'created';
+
       // Results
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
