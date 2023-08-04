@@ -157,10 +157,8 @@ export class XrayService {
         key = response.data.testExecIssue.key;
       }
 
-      let action = 'created';
-      if (this.options.testExecution !== undefined) {
-        action = 'updated';
-      }
+      let action = this.options.testExecution !== undefined ? 'updated' : 'created';
+
       // Results
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
