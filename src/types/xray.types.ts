@@ -13,7 +13,6 @@ export interface XrayOptions {
         token: string
     }
     projectKey: string;
-    project: string;
     testPlan: string;
     testExecution?: string;
     revision?: string;

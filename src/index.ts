@@ -29,7 +29,7 @@ class XrayReporter implements Reporter {
       testExecutionKey: this.options.testExecution,
       info: {
         summary: this.defaultRunName,
-        project: this.options.project,
+        project: this.options.projectKey,
         startDate: this.help.getFormatData(new Date()),
         finishDate: this.help.getFormatData(new Date()),
         testPlanKey: this.options.testPlan,

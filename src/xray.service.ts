@@ -106,8 +106,6 @@ export class XrayService {
           },
         });
 
-        if (!options.project) throw new Error('"project" option is missed, server version of Xray needs it. Please, provide it in the config');
-
         break;
     }
 
