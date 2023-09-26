@@ -12,7 +12,7 @@ import { ExecInfo } from './types/execInfo.types';
 class XrayReporter implements Reporter {
   private xrayService!: XrayService;
   private testResults!: XrayTestResult;
-  private testCaseKeyPattern = /^(.*?) |$/;
+  private testCaseKeyPattern = /^(.+?) \| /;
   private receivedRegEx: RegExp = /Received string: "(.*?)"(?=\n)/;
   private options: XrayOptions;
   private execInfo!: ExecInfo;
