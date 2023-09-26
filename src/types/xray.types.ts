@@ -1,3 +1,5 @@
+import { AxiosProxyConfig } from "axios";
+
 export interface XrayOptions {
     jira: {
         url: string,
@@ -13,5 +15,10 @@ export interface XrayOptions {
     projectKey: string;
     testPlan: string;
     testExecution?: string;
+    revision?: string;
+    description?: string;
+    testEnvironments?: string[];
+    version?: string;
     debug: boolean;
+    proxy?: AxiosProxyConfig;
 }

@@ -16,6 +16,7 @@ export interface XrayTestResult {
 
 export interface XrayInfo {
   summary: string;
+  project: string;
   description?: string;
   version?: string;
   user?: string;

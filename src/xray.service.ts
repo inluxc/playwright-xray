@@ -2,8 +2,10 @@ import { XrayOptions } from './types/xray.types';
 import { XrayTestResult } from './types/cloud.types';
 import axios, { Axios, AxiosError } from 'axios';
 import { inspect } from 'util';
-import { blue, bold, green, red } from 'picocolors';
+import { blue, bold, green, red, yellow } from 'picocolors';
 import * as fs from 'fs';
+import Help from './help';
+import { ExecInfo } from './types/execInfo.types';
 
 function isAxiosError(error: any): error is AxiosError {
   return error.isAxiosError === true;
@@ -19,6 +21,7 @@ export class XrayService {
   private readonly requestUrl: string;
   private readonly options: XrayOptions;
   private axios: Axios;
+  private help: Help;
 
   constructor(options: XrayOptions) {
     // Init vars
@@ -28,6 +31,7 @@ export class XrayService {
     this.token = '';
     this.requestUrl = '';
     this.options = options;
+    this.help = new Help(this.options.jira.type);
 
     // Set Jira URL
     if (!options.jira.url) throw new Error('"jira.url" option is missed. Please, provide it in the config');
@@ -39,6 +43,12 @@ export class XrayService {
 
     // Init axios instance
     this.axios = axios;
+
+    this.axios.defaults.headers.options = {
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache',
+      Expires: '0',
+    };
 
     switch (this.type) {
       case 'cloud':
@@ -106,11 +116,14 @@ export class XrayService {
     if (!options.testPlan) throw new Error('"testPlan" option are missed. Please provide them in the config');
   }
 
-  async createRun(results: XrayTestResult) {
+  async createRun(results: XrayTestResult, execInfo: ExecInfo) {
     const URL = `${this.requestUrl}/import/execution`;
     const total = results.tests?.length;
+    const duration = new Date(results.info.finishDate).getTime() - new Date(results.info.startDate).getTime();
     let passed = 0;
     let failed = 0;
+
+    //console.log(results);
 
     results.tests!.forEach((test: { status: any }) => {
       switch (test.status) {
@@ -136,6 +149,7 @@ export class XrayService {
         maxBodyLength: 107374182400, //100gb
         maxContentLength: 107374182400, //100gb
         timeout: 600000, //10min
+        proxy: this.options.proxy !== undefined ? this.options.proxy : false,
       });
       if (response.status !== 200) throw new Error(`${response.status} - Failed to create test cycle`);
       let key = response.data.key;
@@ -143,37 +157,84 @@ export class XrayService {
         key = response.data.testExecIssue.key;
       }
 
+      let action = this.options.testExecution !== undefined ? 'updated' : 'created';
+
       // Results
-      console.log(`${bold(blue(`-------------------------------------`))}`);
-      console.log(`${bold(blue(` `))}`);
-      console.log(`${bold(blue(`✅ Test plan: ${this.options.testPlan}`))}`);
-      console.log(`${bold(blue(`✅ Tests ran: ${total}`))}`);
-      console.log(`${bold(green(`✅ Tests passed: ${passed}`))}`);
-      console.log(`${bold(red(`✅ Tests failed: ${failed}`))}`);
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
       console.log(`${bold(blue(` `))}`);
-      console.log(`${bold(blue(`✅ Test cycle ${key} has been created`))}`);
+      console.log(`${bold(green(`😀 Successfully sending test results to Jira`))}`);
+      console.log(`${bold(blue(` `))}`);
+      if (this.options.description !== undefined) {
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Description:       ${this.options.description}`))}`);
+      }
+      if (this.options.testEnvironments !== undefined) {
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test environments: ${this.options.testEnvironments}`))}`);
+      }
+      if (this.options.version !== undefined) {
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Version:           ${this.options.version}`))}`);
+      }
+      if (this.options.revision !== undefined) {
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Revision:          ${this.options.revision}`))}`);
+      }
+      if (execInfo.browserName !== undefined) {
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Browsers:          ${execInfo.browserName}`))}`);
+      }
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test plan:         ${this.options.testPlan}`))}`);
+      if (this.options.testExecution !== undefined) {
+        console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test execution:    ${this.options.testExecution}`))}`);
+      }
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test Duration:     ${this.help.convertMsToTime(duration)}`))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Tests ran:         ${total}`))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(green(`Tests passed:      ${passed}`))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(red(`Tests failed:      ${failed}`))}`);
+      console.log(`${bold(blue(` `))}`);
+      console.log(`${bold(blue(`-------------------------------------`))}`);
+      console.log(`${bold(blue(` `))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test cycle ${key} has been ${action}`))}`);
       console.log(`${bold(blue('👇 Check out the test result'))}`);
       console.log(`${bold(blue(`🔗 ${this.jira}browse/${key}`))}`);
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
     } catch (error) {
+      console.log(`${bold(blue(` `))}`);
+      console.log(`${bold(blue(`-------------------------------------`))}`);
+      console.log(`${bold(blue(` `))}`);
+
+      let log = '';
+      let msg = '';
+
       if (isAxiosError(error)) {
-        console.error(`Config: ${inspect(error.config)}`);
+        log = `Config: ${inspect(error.config)}\n\n`;
 
         if (error.response) {
-          throw new Error(
-            `\nStatus: ${error.response.status} \nHeaders: ${inspect(error.response.headers)} \nData: ${inspect(error.response.data)}`,
-          );
+          msg = inspect(error.response.data.error);
+          msg = msg.replace(/'/g, '');
+          log += `Status: ${error.response.status}\n`;
+          log += `Headers: ${inspect(error.response.headers)}\n`;
+          log += `Data: ${inspect(error.response.data)}\n`;
         } else if (error.request) {
-          throw new Error(`The request was made but no response was received. \n Error: ${inspect(error.toJSON())}`);
+          msg = 'The request was made but no response was received';
+          log += `Error: ${inspect(error.toJSON())}\n`;
         } else {
-          throw new Error(`Something happened in setting up the request that triggered an Error\n : ${inspect(error.message)}`);
+          msg = 'Something happened in setting up the request that triggered an error';
+          log += `Error: ${inspect(error.message)}\n`;
         }
+      } else {
+        log = `Unknown error: ${error}\n`;
       }
+      fs.writeFileSync('playwright-xray-error.log', log);
 
-      throw new Error(`\nUnknown error: ${error}`);
+      let msgs = msg.split(';');
+      console.log(`${bold(red(`😞 Error sending test results to Jira`))}`);
+      console.log(`${bold(blue(` `))}`);
+      msgs.forEach((m) => {
+        console.log(`${bold(red(`⛔ ${m}`))}`);
+      });
+      console.log(`${bold(blue(` `))}`);
+      console.log(`${bold(blue('👉 Check the "playwright-xray-error.log" file for more details'))}`);
+      console.log(`${bold(blue(` `))}`);
+      console.log(`${bold(blue(`-------------------------------------`))}`);
     }
   }
 }

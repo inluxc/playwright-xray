@@ -1,40 +1,61 @@
 import type { XrayTestResult, XrayTestSteps, XrayTestEvidence, XrayTest } from './types/cloud.types';
-import { XrayCloudStatus } from './types/cloud.types';
-import { XrayServerStatus } from './types/server.types';
 import type { XrayOptions } from './types/xray.types';
-import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
+import type { Reporter, TestCase, TestResult, FullConfig, Suite } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
-import { bold, green, red, yellow } from 'picocolors';
-import dayjs from 'dayjs';
+import { blue, bold, green, red, yellow } from 'picocolors';
 
 import { XrayService } from './xray.service';
+import Help from './help';
+import { ExecInfo } from './types/execInfo.types';
 
 class XrayReporter implements Reporter {
   private xrayService!: XrayService;
   private testResults!: XrayTestResult;
-  private testCaseKeyPattern = /\[(.*?)\]/;
+  private testCaseKeyPattern = /^(.*?) |$/;
   private receivedRegEx: RegExp = /Received string: "(.*?)"(?=\n)/;
   private options: XrayOptions;
+  private execInfo!: ExecInfo;
   private totalDuration: number;
   private readonly defaultRunName = `[${new Date().toUTCString()}] - Automated run`;
+  private help: Help;
 
   constructor(options: XrayOptions) {
     this.options = options;
+    this.help = new Help(this.options.jira.type);
     this.xrayService = new XrayService(this.options);
     this.totalDuration = 0;
     const testResults: XrayTestResult = {
       testExecutionKey: this.options.testExecution,
       info: {
         summary: this.defaultRunName,
-        startDate: this.getFormatData(new Date()),
-        finishDate: this.getFormatData(new Date()),
+        project: this.options.projectKey,
+        startDate: this.help.getFormatData(new Date()),
+        finishDate: this.help.getFormatData(new Date()),
         testPlanKey: this.options.testPlan,
-        revision: '2536',
+        revision: this.options.revision,
+        description: this.options.description,
+        testEnvironments: this.options.testEnvironments,
+        version: this.options.version,
       },
       tests: [] as XrayTest[],
     };
     this.testResults = testResults;
+    console.log(`${bold(blue(`-------------------------------------`))}`);
+    console.log(`${bold(blue(` `))}`);
+
+    this.execInfo = {
+      browserName: '',
+    };
+  }
+
+  onBegin(config: FullConfig, suite: Suite) {
+    config.projects.forEach((p, index) => {
+      this.execInfo.browserName += index > 0 ? ', ' : '';
+      this.execInfo.browserName += p.name.charAt(0).toUpperCase() + p.name.slice(1);
+    });
+    console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Starting the run with ${suite.allTests().length} tests`))}`);
+    console.log(`${bold(blue(` `))}`);
   }
 
   async onTestEnd(testCase: TestCase, result: TestResult) {
@@ -47,9 +68,9 @@ class XrayReporter implements Reporter {
 
       let xrayTestData: XrayTest = {
         testKey: testCode,
-        status: this.convertPwStatusToXray(result.status),
-        start: this.getFormatData(result.startTime),
-        finish: this.getFormatData(finishTime),
+        status: this.help.convertPwStatusToXray(result.status),
+        start: this.help.getFormatData(result.startTime),
+        finish: this.help.getFormatData(finishTime),
         steps: [] as XrayTestSteps[],
         comment: '',
       };
@@ -72,7 +93,8 @@ class XrayReporter implements Reporter {
               }
 
               const xrayTestStep: XrayTestSteps = {
-                status: typeof step.error == 'object' ? this.convertPwStatusToXray('failed') : this.convertPwStatusToXray('passed'),
+                status:
+                  typeof step.error == 'object' ? this.help.convertPwStatusToXray('failed') : this.help.convertPwStatusToXray('passed'),
                 comment: typeof step.error == 'object' ? errorMessage : '',
                 actualResult: dataReceived,
               };
@@ -100,18 +122,25 @@ class XrayReporter implements Reporter {
       xrayTestData.evidence = evidences;
       this.testResults.tests!.push(xrayTestData);
 
-      switch (this.convertPwStatusToXray(result.status)) {
+      let projectID = '';
+      let tst: any = testCase;
+      if (tst._projectId !== undefined) {
+        projectID = tst._projectId;
+        projectID = projectID.charAt(0).toUpperCase() + projectID.slice(1) + ' | ';
+      }
+
+      switch (this.help.convertPwStatusToXray(result.status)) {
         case 'PASS':
         case 'PASSED':
-          console.log(`${bold(green(`✅ ${testCase.title}`))}`);
+          console.log(`${bold(green(`✅ ${projectID}${testCase.title}`))}`);
           break;
         case 'FAIL':
         case 'FAILED':
-          console.log(`${bold(red(`⛔ ${testCase.title}`))}`);
+          console.log(`${bold(red(`⛔ ${projectID}${testCase.title}`))}`);
           break;
         case 'SKIPPED':
         case 'ABORTED':
-          console.log(`${bold(yellow(`🚫 ${testCase.title}`))}`);
+          console.log(`${bold(yellow(`🚫 ${projectID}${testCase.title}`))}`);
           break;
       }
     }
@@ -119,37 +148,16 @@ class XrayReporter implements Reporter {
 
   async onEnd() {
     // Update test Duration
-    this.testResults?.info?.finishDate !=
-      this.getFormatData(
-        new Date(
-          new Date((this.testResults && this.testResults.info ? this.testResults.info.startDate : undefined)!).getTime() +
-            this.totalDuration,
-        ),
-      );
+    this.testResults.info.finishDate = this.help.getFormatData(
+      new Date(
+        new Date((this.testResults && this.testResults.info ? this.testResults.info.startDate : undefined)!).getTime() + this.totalDuration,
+      ),
+    );
+
     if (typeof this.testResults != 'undefined' && typeof this.testResults.tests != 'undefined' && this.testResults.tests.length > 0) {
-      await this.xrayService.createRun(this.testResults);
+      await this.xrayService.createRun(this.testResults, this.execInfo);
     } else {
       console.log(`There are no tests with such ${this.testCaseKeyPattern} key pattern`);
-    }
-  }
-
-  convertPwStatusToXray(status: string): string {
-    switch (this.options.jira.type) {
-      case 'cloud':
-        return XrayCloudStatus[status];
-      case 'server':
-        return XrayServerStatus[status];
-      default:
-        return '';
-    }
-  }
-
-  getFormatData(date: Date) {
-    if (this.options.jira.type === 'cloud') {
-      return date.toISOString();
-    } else {
-      const d = dayjs(date);
-      return d.format();
     }
   }
 }
