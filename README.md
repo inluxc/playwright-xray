@@ -31,6 +31,7 @@ const config: PlaywrightTestConfig = {
         jira: {
           url: 'https://your-jira-url',
           type: 'cloud',
+          apiVersion: '1.0',
         },
         cloud: {
           client_id: '',
@@ -61,6 +62,7 @@ const config: PlaywrightTestConfig = {
         jira: {
           url: 'https://your-jira-url',
           type: 'server',
+          apiVersion: '1.0',
         },
         server: {
           token: 'YOUR_SERVER_TOKEN',
@@ -101,6 +103,7 @@ const config: PlaywrightTestConfig = {
         jira: {
           url: 'https://your-jira-url',
           type: 'server',
+          apiVersion: '1.0',
         },
         cloud: {
           client_id: '',
@@ -140,6 +143,7 @@ const config: PlaywrightTestConfig = {
         jira: {
           url: 'https://your-jira-url',
           type: 'server',
+          apiVersion: '1.0',
         },
         cloud: {
           client_id: '',
@@ -241,6 +245,7 @@ const config: PlaywrightTestConfig = {
         jira: {
           url: 'https://your-jira-url',
           type: 'server',
+          apiVersion: '1.0',
         },
         server: {
           token: 'YOUR_SERVER_TOKEN',
