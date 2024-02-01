@@ -18,6 +18,7 @@ export class XrayService {
   private readonly password: string;
   private readonly token: string;
   private readonly type: string;
+  private readonly apiVersion: string;
   private readonly requestUrl: string;
   private readonly options: XrayOptions;
   private axios: Axios;
@@ -40,6 +41,10 @@ export class XrayService {
     // Set Jira Server Type
     if (!options.jira.type) throw new Error('"jira.type" option is missed. Please, provide it in the config');
     this.type = options.jira.type;
+
+    // Set Jira API apiVersion
+    if (!options.jira.apiVersion) throw new Error('"jira.apiVersion" option is missed. Please, provide it in the config');
+    this.apiVersion = options.jira.apiVersion;
 
     // Init axios instance
     this.axios = axios;
@@ -95,7 +100,7 @@ export class XrayService {
         this.token = options.server?.token;
 
         // Set Request URL
-        this.requestUrl = this.xray + 'rest/raven/1.0';
+        this.requestUrl = this.xray + this.apiVersion !== '1.0' ? `rest/raven/${this.apiVersion}/api` : 'rest/raven/1.0';
 
         //Create Axios Instance with Auth
         this.axios = axios.create({
