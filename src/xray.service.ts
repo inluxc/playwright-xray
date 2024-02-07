@@ -1,15 +1,12 @@
 import { XrayOptions } from './types/xray.types';
 import { XrayTestResult } from './types/cloud.types';
-import axios, { Axios, AxiosError } from 'axios';
+import axios, { Axios } from 'axios';
 import { inspect } from 'util';
 import { blue, bold, green, red, yellow } from 'picocolors';
 import * as fs from 'fs';
 import Help from './help';
 import { ExecInfo } from './types/execInfo.types';
 
-function isAxiosError(error: any): error is AxiosError {
-  return error.isAxiosError === true;
-}
 
 export class XrayService {
   private readonly xray: string;
@@ -209,7 +206,7 @@ export class XrayService {
       let log = '';
       let msg = '';
 
-      if (isAxiosError(error)) {
+      if (axios.isAxiosError(error)) {
         log = `Config: ${inspect(error.config)}\n\n`;
 
         if (error.response) {
