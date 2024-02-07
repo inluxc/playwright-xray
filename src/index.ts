@@ -76,7 +76,8 @@ class XrayReporter implements Reporter {
       };
 
       // Set Test Error
-      if (result.errors.length > 0) {
+      const pwStepsExists = result.steps.some(step => step.category.includes("test.step"));
+      if (result.errors.length > 0 && !pwStepsExists) {
         xrayTestData.comment = JSON.stringify(result.errors);
       } else {
         await Promise.all(
