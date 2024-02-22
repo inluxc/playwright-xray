@@ -213,7 +213,7 @@ export class XrayService {
         log = `Config: ${inspect(error.config)}\n\n`;
 
         if (error.response) {
-          msg = inspect(error.response.data.error);
+          msg = inspect(error.response.data);
           msg = msg.replace(/'/g, '');
           log += `Status: ${error.response.status}\n`;
           log += `Headers: ${inspect(error.response.headers)}\n`;
