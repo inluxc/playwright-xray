@@ -22,4 +22,7 @@ export interface XrayOptions {
   version?: string;
   debug: boolean;
   proxy?: AxiosProxyConfig;
+  uploadScreenShot?: boolean;
+  uploadTrace?: boolean;
+  uploadVideo?: boolean;
 }

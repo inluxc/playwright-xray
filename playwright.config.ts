@@ -7,8 +7,9 @@ const config: PlaywrightTestConfig = {
             './src/index.ts',
             {
                 jira: {
-                    url: 'https://client.atlassian.net/',
+                    url: 'https://ica.atlassian.net/',
                     type: 'cloud', // cloud, server
+                    apiVersion: '1.0'
                 },
                 cloud: {
                     client_id: '',
@@ -17,14 +18,19 @@ const config: PlaywrightTestConfig = {
                 server: {
                     token: '',
                 },
-                projectKey: 'CODE',
-                testPlan: 'CODE-1820',
-                debug: false,
+                testEnvironments:["mobile"],
+                projectKey: 'TES',
+                testPlan: 'TES-51',
+                debug: true,
+                uploadScreenShot: true,
+                uploadTrace: true,
+                uploadVideo: true
             },
         ],
     ],
     use: {
         screenshot: 'only-on-failure',
+        trace: "retain-on-failure"
     },
     projects: [
         {

@@ -121,6 +121,9 @@ const config: PlaywrightTestConfig = {
         revision: '12345',
         description: 'This test was executed automatically',
         testEnvironments: ['dev', 'test'],
+        uploadScreenShot: true,
+        uploadTrace: true,
+        uploadVideo: true
       },
     ],
   ],
@@ -269,8 +272,37 @@ If no config file is chosen, the default config file "playwright.config.ts" will
 
 ## Notes
 
-- To have the steps imported you have to create then in the test issue itself.
+- To have the steps imported you have to create them in the test issue itself.
   The steps will be imported by order of execution and inserted into the test.
+
+- Xray only permits an upload size of maximum 100 MiB and subsequently playwright-xray will fail to upload the 
+  execution result due to the total size of videos and traces exceedes this limit. In order to still be able to 
+  update the Xray execution status while still being able to view the videos and traces in e.g. Jenkins the 
+  switches below can be used to exclude evidence from the Xray import file.
+
+```ts
+[
+      'playwright-xray',
+      {
+        jira: {
+          url: 'https://your-jira-url',
+          type: 'server',
+          apiVersion: '1.0',
+        },
+        server: {
+          token: 'YOUR_SERVER_TOKEN',
+        },
+        projectKey: 'TCK',
+        testPlan: 'TCK-87',
+        uploadScreenShot: false,
+        uploadTrace: false,
+        uploadVideo: false
+      },
+    ],
+```
+- Please ensure that you correctly type the e.g. testKey in the test or you might encounter {"error":"Invalid JQL query"}
+  respnse, e.g. if you type TES- 49 instead of TES-49. 
+
 
 ## License
 

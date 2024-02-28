@@ -19,12 +19,18 @@ class XrayReporter implements Reporter {
   private totalDuration: number;
   private readonly defaultRunName = `[${new Date().toUTCString()}] - Automated run`;
   private help: Help;
+  private upploadScreenShot: boolean | undefined;
+  private uploadTrace: boolean | undefined;
+  private uploadVideo: boolean | undefined;
 
   constructor(options: XrayOptions) {
     this.options = options;
     this.help = new Help(this.options.jira.type);
     this.xrayService = new XrayService(this.options);
     this.totalDuration = 0;
+    this.upploadScreenShot = options.uploadScreenShot;
+    this.uploadTrace = options.uploadTrace;
+    this.uploadVideo = options.uploadVideo;
     const testResults: XrayTestResult = {
       testExecutionKey: this.options.testExecution,
       info: {
@@ -43,7 +49,8 @@ class XrayReporter implements Reporter {
     this.testResults = testResults;
     console.log(`${bold(blue(`-------------------------------------`))}`);
     console.log(`${bold(blue(` `))}`);
-
+    if (this.options.testEnvironments != null)
+      testResults.info.summary = testResults.info.summary + ' - ' + JSON.stringify(this.options.testEnvironments);
     this.execInfo = {
       browserName: '',
     };
@@ -82,7 +89,7 @@ class XrayReporter implements Reporter {
       } else {
         await Promise.all(
           result.steps.map(async (step) => {
-            if (step.category != 'hook') {
+            if (step.category == 'test.step') {
               // Add Step to request
               const errorMessage = step.error?.stack
                 ?.toString()
@@ -109,14 +116,15 @@ class XrayReporter implements Reporter {
       const evidences: XrayTestEvidence[] = [];
       if (result.attachments.length > 0) {
         result.attachments.map(async (attach) => {
-          const filename = path.basename(attach.path!);
-          const attachData = fs.readFileSync(attach.path!, { encoding: 'base64' });
-          const evid: XrayTestEvidence = {
-            data: attachData,
-            filename: filename,
-            contentType: attach.contentType,
-          };
-          evidences.push(evid);
+          if (attach.name.includes("screenshot") && this.upploadScreenShot) {
+            await this.addEvidence(attach, evidences);
+          }
+          if (attach.name.includes("trace") && this.uploadTrace) {
+            await this.addEvidence(attach, evidences);
+          }
+          if (attach.name.includes("video") && this.uploadVideo) {
+            await this.addEvidence(attach, evidences);
+          }
         });
       }
 
@@ -145,6 +153,16 @@ class XrayReporter implements Reporter {
           break;
       }
     }
+  }
+  async addEvidence(attach: { name: string; contentType: string; path?: string | undefined; body?: Buffer | undefined; }, evidences: XrayTestEvidence[]) {
+    const filename = path.basename(attach.path!);
+    const attachData = fs.readFileSync(attach.path!, { encoding: 'base64' });
+    const evid: XrayTestEvidence = {
+      data: attachData,
+      filename: filename,
+      contentType: attach.contentType,
+    };
+    evidences.push(evid);;
   }
 
   async onEnd() {
