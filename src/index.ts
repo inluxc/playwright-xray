@@ -3,7 +3,7 @@ import type { XrayOptions } from './types/xray.types';
 import type { Reporter, TestCase, TestResult, FullConfig, Suite } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
-import { blue, bold, green, red, yellow } from 'picocolors';
+import { blue, bold, green, red, white, yellow } from 'picocolors';
 
 import { XrayService } from './xray.service';
 import Help from './help';
@@ -22,6 +22,7 @@ class XrayReporter implements Reporter {
   private upploadScreenShot: boolean | undefined;
   private uploadTrace: boolean | undefined;
   private uploadVideo: boolean | undefined;
+  private stepCategories = ['expect', 'pw:api', 'test.step'];
 
   constructor(options: XrayOptions) {
     this.options = options;
@@ -31,6 +32,7 @@ class XrayReporter implements Reporter {
     this.upploadScreenShot = options.uploadScreenShot;
     this.uploadTrace = options.uploadTrace;
     this.uploadVideo = options.uploadVideo;
+    this.stepCategories = options.stepCategories == undefined ? this.stepCategories : options.stepCategories;
     const testResults: XrayTestResult = {
       testExecutionKey: this.options.testExecution,
       info: {
@@ -89,7 +91,8 @@ class XrayReporter implements Reporter {
       } else {
         await Promise.all(
           result.steps.map(async (step) => {
-            if (step.category == 'test.step') {
+            //if ( step.category == 'test.step') {
+            if (this.stepCategories.some(type => type.includes(step.category))) {
               // Add Step to request
               const errorMessage = step.error?.stack
                 ?.toString()
@@ -149,7 +152,7 @@ class XrayReporter implements Reporter {
           break;
         case 'SKIPPED':
         case 'ABORTED':
-          console.log(`${bold(yellow(`🚫 ${projectID}${testCase.title}`))}`);
+          console.log(`${bold(white(`🚫 ${projectID}${testCase.title}`))}`);
           break;
       }
     }

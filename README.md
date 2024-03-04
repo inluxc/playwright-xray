@@ -123,7 +123,8 @@ const config: PlaywrightTestConfig = {
         testEnvironments: ['dev', 'test'],
         uploadScreenShot: true,
         uploadTrace: true,
-        uploadVideo: true
+        uploadVideo: true,
+        markFlakyWith: "FLAKY"
       },
     ],
   ],
@@ -206,9 +207,10 @@ Then run your tests with `npx playwright test` command and you'll see the result
 ⏺  Test plan:         XRAYISSUE-123
 ⏺  Test execution:    XRAYISSUE-324
 ⏺  Test Duration:     25s
-⏺  Tests ran:         6
+⏺  Tests ran:         6 (including reruns)
 ⏺  Tests passed:      3
 ⏺  Tests failed:      3
+⏺  Flaky test:        0
 
 -------------------------------------
 
@@ -276,9 +278,23 @@ If no config file is chosen, the default config file "playwright.config.ts" will
   The steps will be imported by order of execution and inserted into the test.
 
 - Xray only permits an upload size of maximum 100 MiB and subsequently playwright-xray will fail to upload the 
-  execution result due to the total size of videos and traces exceedes this limit. In order to still be able to 
+  execution result due to the total size of videos and traces exceeds this limit. In order to still be able to 
   update the Xray execution status while still being able to view the videos and traces in e.g. Jenkins the 
   switches below can be used to exclude evidence from the Xray import file.
+
+- Test that will pass after a rerun will be tagged with whatever is defined with the option "markFlakyWith"
+  If this option is not set, the test will be tagged as PASSED. Please note that you have to define the
+  Execution Status you choose in Xray, e.g. FLAKY.
+
+- Stepcategories defines how playwright-xray reporter should recognize test steps. The built-in categories in Playwright are the following:
+
+* `hook` for fixtures and hooks initialization and teardown
+* `expect` for expect calls
+* `pw:api` for Playwright API calls.
+* `test.step` for test.step API calls.
+
+If the option `stepCategories` is not set, playwright-xray will default to `['expect', 'pw:api', 'test.step']` If e.g. only `['test.step']`
+is defined, playwright-xray will only record code defined with `test.step('This is a test step', async () => { .... });` as a test step.
 
 ```ts
 [
@@ -296,7 +312,9 @@ If no config file is chosen, the default config file "playwright.config.ts" will
         testPlan: 'TCK-87',
         uploadScreenShot: false,
         uploadTrace: false,
-        uploadVideo: false
+        uploadVideo: false,
+        markFlakyWith: "FLAKY",
+        stepCategories: ['test.step']
       },
     ],
 ```

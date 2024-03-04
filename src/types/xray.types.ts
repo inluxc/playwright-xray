@@ -25,4 +25,6 @@ export interface XrayOptions {
   uploadScreenShot?: boolean;
   uploadTrace?: boolean;
   uploadVideo?: boolean;
+  markFlakyWith?: string;
+  stepCategories: string[];
 }
