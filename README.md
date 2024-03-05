@@ -124,7 +124,9 @@ const config: PlaywrightTestConfig = {
         uploadScreenShot: true,
         uploadTrace: true,
         uploadVideo: true,
-        markFlakyWith: "FLAKY"
+        markFlakyWith: "FLAKY",
+        stepCategories: ['test.step'],
+        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`
       },
     ],
   ],
@@ -296,6 +298,9 @@ If no config file is chosen, the default config file "playwright.config.ts" will
 If the option `stepCategories` is not set, playwright-xray will default to `['expect', 'pw:api', 'test.step']` If e.g. only `['test.step']`
 is defined, playwright-xray will only record code defined with `test.step('This is a test step', async () => { .... });` as a test step.
 
+- The test execution summary defaults to `[${new Date().toUTCString()}] - Automated run` but this can be overidden by the
+  config file option `summary:`
+
 ```ts
 [
       'playwright-xray',
@@ -314,7 +319,8 @@ is defined, playwright-xray will only record code defined with `test.step('This 
         uploadTrace: false,
         uploadVideo: false,
         markFlakyWith: "FLAKY",
-        stepCategories: ['test.step']
+        stepCategories: ['test.step'],
+        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`
       },
     ],
 ```

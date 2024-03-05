@@ -27,4 +27,5 @@ export interface XrayOptions {
   uploadVideo?: boolean;
   markFlakyWith?: string;
   stepCategories: string[];
+  summary: string;
 }

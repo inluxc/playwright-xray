@@ -51,8 +51,8 @@ class XrayReporter implements Reporter {
     this.testResults = testResults;
     console.log(`${bold(blue(`-------------------------------------`))}`);
     console.log(`${bold(blue(` `))}`);
-    if (this.options.testEnvironments != null)
-      testResults.info.summary = testResults.info.summary + ' - ' + JSON.stringify(this.options.testEnvironments);
+    if (this.options.summary !== undefined)
+      testResults.info.summary = this.options.summary;
     this.execInfo = {
       browserName: '',
     };
