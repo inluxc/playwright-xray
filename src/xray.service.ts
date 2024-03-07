@@ -2,10 +2,11 @@ import { XrayOptions } from './types/xray.types';
 import { XrayTestResult } from './types/cloud.types';
 import axios, { Axios } from 'axios';
 import { inspect } from 'util';
-import { blue, bold, green, red, yellow } from 'picocolors';
+import { blue, bold, green, red, white, yellow } from 'picocolors';
 import * as fs from 'fs';
 import Help from './help';
 import { ExecInfo } from './types/execInfo.types';
+
 
 export class XrayService {
   private readonly xray: string;
@@ -123,18 +124,34 @@ export class XrayService {
     const duration = new Date(results.info.finishDate).getTime() - new Date(results.info.startDate).getTime();
     let passed = 0;
     let failed = 0;
+    let flaky = 0;
+    let skipped = 0;
 
+    try {
+      if (this.options.debug) {
+        fs.writeFile('xray-payload-debug.json', JSON.stringify(results), (err) => {
+          if (err) throw err;
+        });
+      }
+    } catch (error) { }
     //console.log(results);
-
-    results.tests!.forEach((test: { status: any }) => {
+    results.tests!.forEach((test: { status: any, testKey: string }) => {
       switch (test.status) {
+        case 'SKIPPED':
+          skipped = skipped + 1;
+          break;
         case 'PASS':
         case 'PASSED':
           passed = passed + 1;
           break;
         case 'FAIL':
         case 'FAILED':
-          failed = failed + 1;
+          if (this.isThereFlaky(results, test))
+            flaky = flaky + 1;
+          else{
+            failed = failed + 1;
+            this.removeDuplicates(results,test);
+          }
           break;
       }
     });
@@ -186,9 +203,11 @@ export class XrayService {
         console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test execution:    ${this.options.testExecution}`))}`);
       }
       console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test Duration:     ${this.help.convertMsToTime(duration)}`))}`);
-      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Tests ran:         ${total}`))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Tests ran:         ${total} (including reruns)`))}`);
       console.log(`${bold(yellow(`⏺  `))}${bold(green(`Tests passed:      ${passed}`))}`);
       console.log(`${bold(yellow(`⏺  `))}${bold(red(`Tests failed:      ${failed}`))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(yellow(`Flaky tests:       ${flaky}`))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(white(`Skipped tests:     ${skipped}`))}`);
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
       console.log(`${bold(blue(` `))}`);
@@ -209,7 +228,7 @@ export class XrayService {
         log = `Config: ${inspect(error.config)}\n\n`;
 
         if (error.response) {
-          msg = inspect(error.response.data);
+          msg = inspect(error.response.data.error);
           msg = msg.replace(/'/g, '');
           log += `Status: ${error.response.status}\n`;
           log += `Headers: ${inspect(error.response.headers)}\n`;
@@ -237,5 +256,26 @@ export class XrayService {
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
     }
+  }
+
+  private isThereFlaky(results: XrayTestResult, test: { status: any; testKey: string; }) {
+    const flaky = results.tests?.find((item) => item.testKey.includes(test.testKey) && item.status.includes('PASSED'));
+    if (flaky !== undefined) {
+      let passed = results.tests?.at(results.tests.indexOf(flaky));
+      if (passed != undefined)
+        passed.status = this.options.markFlakyWith === undefined ? "PASSED" : this.options.markFlakyWith;
+
+      const duplicates = results.tests?.filter((item) => item.testKey.includes(test.testKey) && item.status.includes('FAILED'));
+      duplicates?.forEach((duplicate) => results.tests?.splice(results.tests?.indexOf(duplicate), 1));
+      return true
+    }
+    else 
+    return false
+  }
+
+  private removeDuplicates(results: XrayTestResult, test: { status: any; testKey: string; }) {
+      const duplicates = results.tests?.filter((item) => item.testKey.includes(test.testKey) && item.status.includes('FAILED'));
+      duplicates?.pop()
+      duplicates?.forEach((duplicate) => results.tests?.splice(results.tests?.indexOf(duplicate), 1));
   }
 }

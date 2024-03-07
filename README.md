@@ -121,6 +121,12 @@ const config: PlaywrightTestConfig = {
         revision: '12345',
         description: 'This test was executed automatically',
         testEnvironments: ['dev', 'test'],
+        uploadScreenShot: true,
+        uploadTrace: true,
+        uploadVideo: true,
+        markFlakyWith: "FLAKY",
+        stepCategories: ['test.step'],
+        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`
       },
     ],
   ],
@@ -203,9 +209,10 @@ Then run your tests with `npx playwright test` command and you'll see the result
 ⏺  Test plan:         XRAYISSUE-123
 ⏺  Test execution:    XRAYISSUE-324
 ⏺  Test Duration:     25s
-⏺  Tests ran:         6
+⏺  Tests ran:         6 (including reruns)
 ⏺  Tests passed:      3
 ⏺  Tests failed:      3
+⏺  Flaky test:        0
 
 -------------------------------------
 
@@ -269,8 +276,57 @@ If no config file is chosen, the default config file "playwright.config.ts" will
 
 ## Notes
 
-- To have the steps imported you have to create then in the test issue itself.
+- To have the steps imported you have to create them in the test issue itself.
   The steps will be imported by order of execution and inserted into the test.
+
+- Xray only permits an upload size of maximum 100 MiB and subsequently playwright-xray will fail to upload the 
+  execution result due to the total size of videos and traces exceeds this limit. In order to still be able to 
+  update the Xray execution status while still being able to view the videos and traces in e.g. Jenkins the 
+  switches below can be used to exclude evidence from the Xray import file.
+
+- Test that will pass after a rerun will be tagged with whatever is defined with the option "markFlakyWith"
+  If this option is not set, the test will be tagged as PASSED. Please note that you have to define the
+  Execution Status you choose in Xray, e.g. FLAKY.
+
+- Stepcategories defines how playwright-xray reporter should recognize test steps. The built-in categories in Playwright are the following:
+
+* `hook` for fixtures and hooks initialization and teardown
+* `expect` for expect calls
+* `pw:api` for Playwright API calls.
+* `test.step` for test.step API calls.
+
+If the option `stepCategories` is not set, playwright-xray will default to `['expect', 'pw:api', 'test.step']` If e.g. only `['test.step']`
+is defined, playwright-xray will only record code defined with `test.step('This is a test step', async () => { .... });` as a test step.
+
+- The test execution summary defaults to `[${new Date().toUTCString()}] - Automated run` but this can be overidden by the
+  config file option `summary:`
+
+```ts
+[
+      'playwright-xray',
+      {
+        jira: {
+          url: 'https://your-jira-url',
+          type: 'server',
+          apiVersion: '1.0',
+        },
+        server: {
+          token: 'YOUR_SERVER_TOKEN',
+        },
+        projectKey: 'TCK',
+        testPlan: 'TCK-87',
+        uploadScreenShot: false,
+        uploadTrace: false,
+        uploadVideo: false,
+        markFlakyWith: "FLAKY",
+        stepCategories: ['test.step'],
+        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`
+      },
+    ],
+```
+- Please ensure that you correctly type the e.g. testKey in the test or you might encounter {"error":"Invalid JQL query"}
+  respnse, e.g. if you type TES- 49 instead of TES-49. 
+
 
 ## License
 

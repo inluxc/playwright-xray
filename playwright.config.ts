@@ -9,6 +9,7 @@ const config: PlaywrightTestConfig = {
                 jira: {
                     url: 'https://client.atlassian.net/',
                     type: 'cloud', // cloud, server
+                    apiVersion: '1.0'
                 },
                 cloud: {
                     client_id: '',
@@ -19,12 +20,13 @@ const config: PlaywrightTestConfig = {
                 },
                 projectKey: 'CODE',
                 testPlan: 'CODE-1820',
-                debug: false,
+                debug: false
             },
         ],
     ],
     use: {
         screenshot: 'only-on-failure',
+        trace: "retain-on-failure"
     },
     projects: [
         {

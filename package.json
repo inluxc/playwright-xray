@@ -1,6 +1,6 @@
 {
   "name": "playwright-xray",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "XRAY reporter for the Playwright",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -37,6 +37,7 @@
   "homepage": "https://github.com/inluxc/playwright-xray#readme",
   "devDependencies": {
     "@playwright/test": "^1.30.0",
+    "@types/node": "^20.11.25",
     "prettier": "^2.5.1",
     "release-it": "^17.1.1",
     "typescript": "^4.5.4"
