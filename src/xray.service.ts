@@ -245,13 +245,6 @@ export class XrayService {
       }
       fs.writeFileSync('playwright-xray-error.log', log);
 
-      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Tests ran:         ${total} (including reruns)`))}`);
-      console.log(`${bold(yellow(`⏺  `))}${bold(green(`Tests passed:      ${passed}`))}`);
-      console.log(`${bold(yellow(`⏺  `))}${bold(red(`Tests failed:      ${failed}`))}`);
-      console.log(`${bold(yellow(`⏺  `))}${bold(yellow(`Flaky tests:       ${flaky}`))}`);
-      console.log(`${bold(yellow(`⏺  `))}${bold(white(`Skipped tests:     ${skipped}`))}`);
-
-
       let msgs = msg.split(';');
       console.log(`${bold(red(`😞 Error sending test results to Jira`))}`);
       console.log(`${bold(blue(` `))}`);

@@ -19,7 +19,7 @@ class XrayReporter implements Reporter {
   private totalDuration: number;
   private readonly defaultRunName = `[${new Date().toUTCString()}] - Automated run`;
   private help: Help;
-  private upploadScreenShot: boolean | undefined;
+  private uploadScreenShot: boolean | undefined;
   private uploadTrace: boolean | undefined;
   private uploadVideo: boolean | undefined;
   private stepCategories = ['expect', 'pw:api', 'test.step'];
@@ -29,7 +29,7 @@ class XrayReporter implements Reporter {
     this.help = new Help(this.options.jira.type);
     this.xrayService = new XrayService(this.options);
     this.totalDuration = 0;
-    this.upploadScreenShot = options.uploadScreenShot;
+    this.uploadScreenShot = options.uploadScreenShot;
     this.uploadTrace = options.uploadTrace;
     this.uploadVideo = options.uploadVideo;
     this.stepCategories = options.stepCategories == undefined ? this.stepCategories : options.stepCategories;
@@ -91,7 +91,6 @@ class XrayReporter implements Reporter {
       } else {
         await Promise.all(
           result.steps.map(async (step) => {
-            //if ( step.category == 'test.step') {
             if (this.stepCategories.some(type => type.includes(step.category))) {
               // Add Step to request
               const errorMessage = step.error?.stack
@@ -119,7 +118,7 @@ class XrayReporter implements Reporter {
       const evidences: XrayTestEvidence[] = [];
       if (result.attachments.length > 0) {
         result.attachments.map(async (attach) => {
-          if (attach.name.includes("screenshot") && this.upploadScreenShot) {
+          if (attach.name.includes("screenshot") && this.uploadScreenShot) {
             await this.addEvidence(attach, evidences);
           }
           if (attach.name.includes("trace") && this.uploadTrace) {

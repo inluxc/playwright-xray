@@ -15,8 +15,7 @@ test('TES-49 | flaky test with playwright steps', async ({ page }) => {
     await expect(title).toHaveText('Playwright');
 
     await test.step('Step 3', async () => {
-        const ran = Math.floor(Math.random() * 2);;
-        console.log("Random " + ran)
+        const ran = Math.floor(Math.random() * 2);
         expect(ran).toBe(1);
     });
 });
