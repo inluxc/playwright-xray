@@ -7,7 +7,6 @@ import * as fs from 'fs';
 import Help from './help';
 import { ExecInfo } from './types/execInfo.types';
 
-
 export class XrayService {
   private readonly xray: string;
   private readonly jira: string;
@@ -133,9 +132,9 @@ export class XrayService {
           if (err) throw err;
         });
       }
-    } catch (error) { }
+    } catch (error) {}
     //console.log(results);
-    results.tests!.forEach((test: { status: any, testKey: string }) => {
+    results.tests!.forEach((test: { status: any; testKey: string }) => {
       switch (test.status) {
         case 'SKIPPED':
           skipped = skipped + 1;
@@ -146,11 +145,10 @@ export class XrayService {
           break;
         case 'FAIL':
         case 'FAILED':
-          if (this.isThereFlaky(results, test))
-            flaky = flaky + 1;
-          else{
+          if (this.isThereFlaky(results, test)) flaky = flaky + 1;
+          else {
             failed = failed + 1;
-            this.removeDuplicates(results,test);
+            this.removeDuplicates(results, test);
           }
           break;
       }
@@ -258,24 +256,21 @@ export class XrayService {
     }
   }
 
-  private isThereFlaky(results: XrayTestResult, test: { status: any; testKey: string; }) {
+  private isThereFlaky(results: XrayTestResult, test: { status: any; testKey: string }) {
     const flaky = results.tests?.find((item) => item.testKey.includes(test.testKey) && item.status.includes('PASSED'));
     if (flaky !== undefined) {
       let passed = results.tests?.at(results.tests.indexOf(flaky));
-      if (passed != undefined)
-        passed.status = this.options.markFlakyWith === undefined ? "PASSED" : this.options.markFlakyWith;
+      if (passed != undefined) passed.status = this.options.markFlakyWith === undefined ? 'PASSED' : this.options.markFlakyWith;
 
       const duplicates = results.tests?.filter((item) => item.testKey.includes(test.testKey) && item.status.includes('FAILED'));
       duplicates?.forEach((duplicate) => results.tests?.splice(results.tests?.indexOf(duplicate), 1));
-      return true
-    }
-    else 
-    return false
+      return true;
+    } else return false;
   }
 
-  private removeDuplicates(results: XrayTestResult, test: { status: any; testKey: string; }) {
-      const duplicates = results.tests?.filter((item) => item.testKey.includes(test.testKey) && item.status.includes('FAILED'));
-      duplicates?.pop()
-      duplicates?.forEach((duplicate) => results.tests?.splice(results.tests?.indexOf(duplicate), 1));
+  private removeDuplicates(results: XrayTestResult, test: { status: any; testKey: string }) {
+    const duplicates = results.tests?.filter((item) => item.testKey.includes(test.testKey) && item.status.includes('FAILED'));
+    duplicates?.pop();
+    duplicates?.forEach((duplicate) => results.tests?.splice(results.tests?.indexOf(duplicate), 1));
   }
 }

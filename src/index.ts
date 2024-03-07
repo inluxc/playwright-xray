@@ -51,8 +51,7 @@ class XrayReporter implements Reporter {
     this.testResults = testResults;
     console.log(`${bold(blue(`-------------------------------------`))}`);
     console.log(`${bold(blue(` `))}`);
-    if (this.options.summary !== undefined)
-      testResults.info.summary = this.options.summary;
+    if (this.options.summary !== undefined) testResults.info.summary = this.options.summary;
     this.execInfo = {
       browserName: '',
     };
@@ -85,13 +84,13 @@ class XrayReporter implements Reporter {
       };
 
       // Set Test Error
-      const pwStepsExists = result.steps.some(step => step.category.includes("test.step"));
+      const pwStepsExists = result.steps.some((step) => step.category.includes('test.step'));
       if (result.errors.length > 0 && !pwStepsExists) {
         xrayTestData.comment = JSON.stringify(result.errors);
       } else {
         await Promise.all(
           result.steps.map(async (step) => {
-            if (this.stepCategories.some(type => type.includes(step.category))) {
+            if (this.stepCategories.some((type) => type.includes(step.category))) {
               // Add Step to request
               const errorMessage = step.error?.stack
                 ?.toString()
@@ -118,13 +117,13 @@ class XrayReporter implements Reporter {
       const evidences: XrayTestEvidence[] = [];
       if (result.attachments.length > 0) {
         result.attachments.map(async (attach) => {
-          if (attach.name.includes("screenshot") && this.uploadScreenShot) {
+          if (attach.name.includes('screenshot') && this.uploadScreenShot) {
             await this.addEvidence(attach, evidences);
           }
-          if (attach.name.includes("trace") && this.uploadTrace) {
+          if (attach.name.includes('trace') && this.uploadTrace) {
             await this.addEvidence(attach, evidences);
           }
-          if (attach.name.includes("video") && this.uploadVideo) {
+          if (attach.name.includes('video') && this.uploadVideo) {
             await this.addEvidence(attach, evidences);
           }
         });
@@ -156,7 +155,10 @@ class XrayReporter implements Reporter {
       }
     }
   }
-  async addEvidence(attach: { name: string; contentType: string; path?: string | undefined; body?: Buffer | undefined; }, evidences: XrayTestEvidence[]) {
+  async addEvidence(
+    attach: { name: string; contentType: string; path?: string | undefined; body?: Buffer | undefined },
+    evidences: XrayTestEvidence[],
+  ) {
     const filename = path.basename(attach.path!);
     const attachData = fs.readFileSync(attach.path!, { encoding: 'base64' });
     const evid: XrayTestEvidence = {
@@ -164,7 +166,7 @@ class XrayReporter implements Reporter {
       filename: filename,
       contentType: attach.contentType,
     };
-    evidences.push(evid);;
+    evidences.push(evid);
   }
 
   async onEnd() {
