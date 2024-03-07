@@ -3,7 +3,7 @@ import type { XrayOptions } from './types/xray.types';
 import type { Reporter, TestCase, TestResult, FullConfig, Suite } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
-import { blue, bold, green, red, yellow } from 'picocolors';
+import { blue, bold, green, red, white, yellow } from 'picocolors';
 
 import { XrayService } from './xray.service';
 import Help from './help';
@@ -19,12 +19,20 @@ class XrayReporter implements Reporter {
   private totalDuration: number;
   private readonly defaultRunName = `[${new Date().toUTCString()}] - Automated run`;
   private help: Help;
+  private upploadScreenShot: boolean | undefined;
+  private uploadTrace: boolean | undefined;
+  private uploadVideo: boolean | undefined;
+  private stepCategories = ['expect', 'pw:api', 'test.step'];
 
   constructor(options: XrayOptions) {
     this.options = options;
     this.help = new Help(this.options.jira.type);
     this.xrayService = new XrayService(this.options);
     this.totalDuration = 0;
+    this.upploadScreenShot = options.uploadScreenShot;
+    this.uploadTrace = options.uploadTrace;
+    this.uploadVideo = options.uploadVideo;
+    this.stepCategories = options.stepCategories == undefined ? this.stepCategories : options.stepCategories;
     const testResults: XrayTestResult = {
       testExecutionKey: this.options.testExecution,
       info: {
@@ -43,7 +51,8 @@ class XrayReporter implements Reporter {
     this.testResults = testResults;
     console.log(`${bold(blue(`-------------------------------------`))}`);
     console.log(`${bold(blue(` `))}`);
-
+    if (this.options.summary !== undefined)
+      testResults.info.summary = this.options.summary;
     this.execInfo = {
       browserName: '',
     };
@@ -82,7 +91,8 @@ class XrayReporter implements Reporter {
       } else {
         await Promise.all(
           result.steps.map(async (step) => {
-            if (step.category != 'hook') {
+            //if ( step.category == 'test.step') {
+            if (this.stepCategories.some(type => type.includes(step.category))) {
               // Add Step to request
               const errorMessage = step.error?.stack
                 ?.toString()
@@ -109,14 +119,15 @@ class XrayReporter implements Reporter {
       const evidences: XrayTestEvidence[] = [];
       if (result.attachments.length > 0) {
         result.attachments.map(async (attach) => {
-          const filename = path.basename(attach.path!);
-          const attachData = fs.readFileSync(attach.path!, { encoding: 'base64' });
-          const evid: XrayTestEvidence = {
-            data: attachData,
-            filename: filename,
-            contentType: attach.contentType,
-          };
-          evidences.push(evid);
+          if (attach.name.includes("screenshot") && this.upploadScreenShot) {
+            await this.addEvidence(attach, evidences);
+          }
+          if (attach.name.includes("trace") && this.uploadTrace) {
+            await this.addEvidence(attach, evidences);
+          }
+          if (attach.name.includes("video") && this.uploadVideo) {
+            await this.addEvidence(attach, evidences);
+          }
         });
       }
 
@@ -141,10 +152,20 @@ class XrayReporter implements Reporter {
           break;
         case 'SKIPPED':
         case 'ABORTED':
-          console.log(`${bold(yellow(`🚫 ${projectID}${testCase.title}`))}`);
+          console.log(`${bold(white(`🚫 ${projectID}${testCase.title}`))}`);
           break;
       }
     }
+  }
+  async addEvidence(attach: { name: string; contentType: string; path?: string | undefined; body?: Buffer | undefined; }, evidences: XrayTestEvidence[]) {
+    const filename = path.basename(attach.path!);
+    const attachData = fs.readFileSync(attach.path!, { encoding: 'base64' });
+    const evid: XrayTestEvidence = {
+      data: attachData,
+      filename: filename,
+      contentType: attach.contentType,
+    };
+    evidences.push(evid);;
   }
 
   async onEnd() {

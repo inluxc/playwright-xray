@@ -22,4 +22,10 @@ export interface XrayOptions {
   version?: string;
   debug: boolean;
   proxy?: AxiosProxyConfig;
+  uploadScreenShot?: boolean;
+  uploadTrace?: boolean;
+  uploadVideo?: boolean;
+  markFlakyWith?: string;
+  stepCategories: string[];
+  summary: string;
 }
