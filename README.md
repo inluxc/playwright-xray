@@ -332,6 +332,13 @@ is defined, playwright-xray will only record code defined with `test.step('This 
 
 playwright-xray is [MIT licensed](./LICENSE).
 
+## Contributors (special thanks for supporting the project)
+
+- [Niklas-Back](https://github.com/Niklas-Back)
+- [rodrigoodhin](https://github.com/rodrigoodhin)
+- [coolswood](https://github.com/coolswood)
+- [roman-gyver](https://github.com/roman-gyver)
+
 ## Author
 
 Fúlvio Carvalhido <inluxc@gmail.com>
