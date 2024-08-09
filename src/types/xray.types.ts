@@ -9,6 +9,7 @@ export interface XrayOptions {
   cloud?: {
     client_id?: string;
     client_secret?: string;
+    xrayUrl?: string;
   };
   server?: {
     token: string;
