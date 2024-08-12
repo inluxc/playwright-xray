@@ -17,7 +17,7 @@ Add reporter to your `playwright.config.ts` configuration file
 
 ### Cloud version
 
-Authenticate with `client_id` and `client_secret` key.
+Authenticate with `client_id` and `client_secret` key. If your Xray instance is in a specified region, the API url can be configured by setting the cloud.xrayUrl parameter. By default, it will point to the US region with URL https://xray.cloud.getxray.app/
 
 ```typescript
 // playwright.config.ts
@@ -36,6 +36,7 @@ const config: PlaywrightTestConfig = {
         cloud: {
           client_id: '',
           client_secret: '',
+          // Optional: xrayUrl: '' if the xray region needs to be specified
         },
         projectKey: 'JIRA_CODE',
         testPlan: 'JIRA_CODEXXXXX',
@@ -108,6 +109,8 @@ const config: PlaywrightTestConfig = {
         cloud: {
           client_id: '',
           client_secret: '',
+          // Optional
+          xrayUrl: '',
         },
         server: {
           token: '',

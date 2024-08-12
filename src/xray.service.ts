@@ -54,7 +54,8 @@ export class XrayService {
     switch (this.type) {
       case 'cloud':
         // Set Xray Server URL
-        this.xray = 'https://xray.cloud.getxray.app/';
+        this.xray =
+          options.cloud?.xrayUrl === undefined || !options.cloud?.xrayUrl ? 'https://xray.cloud.getxray.app/' : options.cloud.xrayUrl;
 
         // Set Xray Credencials
         if (!options.cloud?.client_id || !options.cloud?.client_secret)
@@ -63,7 +64,7 @@ export class XrayService {
         this.password = options.cloud?.client_secret;
 
         // Set Request URL
-        this.requestUrl = this.xray + 'api/v2';
+        this.requestUrl = new URL('api/v2', this.xray).toString();
 
         //Create Axios Instance with Auth
         axios
@@ -81,7 +82,7 @@ export class XrayService {
             });
           })
           .catch((error) => {
-            throw new Error(`Failed to autenticate do host ${this.xray} with error: ${error}`);
+            throw new Error(`Failed to authenticate to host ${this.xray} with error: ${error}`);
           });
 
         break;
