@@ -20,7 +20,7 @@ const config: PlaywrightTestConfig = {
                 },
                 projectKey: 'CODE',
                 testPlan: 'CODE-1820',
-                debug: false
+                dryRun: true
             },
         ],
     ],

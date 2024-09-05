@@ -129,7 +129,8 @@ const config: PlaywrightTestConfig = {
         uploadVideo: true,
         markFlakyWith: "FLAKY",
         stepCategories: ['test.step'],
-        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`
+        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`,
+        dryRun: false
       },
     ],
   ],
@@ -304,6 +305,10 @@ is defined, playwright-xray will only record code defined with `test.step('This 
 - The test execution summary defaults to `[${new Date().toUTCString()}] - Automated run` but this can be overidden by the
   config file option `summary:`
 
+The option `dryRun` can be used to run the tests without uploading the results to Xray. If this option is set to true, the settings `client_id`
+and `client_secret` are ignored. When combined with `debug` set to true, the reporter will produce a `xray-payload.json` file 
+that can be imported separately.
+
 ```ts
 [
       'playwright-xray',
@@ -323,7 +328,8 @@ is defined, playwright-xray will only record code defined with `test.step('This 
         uploadVideo: false,
         markFlakyWith: "FLAKY",
         stepCategories: ['test.step'],
-        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`
+        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`,
+        dryRun: true
       },
     ],
 ```
