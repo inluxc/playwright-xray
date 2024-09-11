@@ -62,7 +62,10 @@ class XrayReporter implements Reporter {
       this.execInfo.browserName += index > 0 ? ', ' : '';
       this.execInfo.browserName += p.name.charAt(0).toUpperCase() + p.name.slice(1);
     });
-    console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Starting the run with ${suite.allTests().length} tests`))}`);
+    if (this.options.dryRun)
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Starting a Dry Run with ${suite.allTests().length} tests`))}`);
+    else
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Starting the run with ${suite.allTests().length} tests`))}`);
     console.log(`${bold(blue(` `))}`);
   }
 
