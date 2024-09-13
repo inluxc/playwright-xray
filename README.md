@@ -129,7 +129,8 @@ const config: PlaywrightTestConfig = {
         uploadVideo: true,
         markFlakyWith: "FLAKY",
         stepCategories: ['test.step'],
-        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`
+        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`,
+        dryRun: false
       },
     ],
   ],
@@ -285,7 +286,7 @@ If no config file is chosen, the default config file "playwright.config.ts" will
 - Xray only permits an upload size of maximum 100 MiB and subsequently playwright-xray will fail to upload the 
   execution result due to the total size of videos and traces exceeds this limit. In order to still be able to 
   update the Xray execution status while still being able to view the videos and traces in e.g. Jenkins the 
-  switches below can be used to exclude evidence from the Xray import file.
+  switches `uploadScreenShot` and/ or `uploadTrace` set to `false` as shown below, can be used to exclude evidence from the Xray import file.
 
 - Test that will pass after a rerun will be tagged with whatever is defined with the option "markFlakyWith"
   If this option is not set, the test will be tagged as PASSED. Please note that you have to define the
@@ -303,6 +304,9 @@ is defined, playwright-xray will only record code defined with `test.step('This 
 
 - The test execution summary defaults to `[${new Date().toUTCString()}] - Automated run` but this can be overidden by the
   config file option `summary:`
+
+The option `dryRun` can be used to run the tests without uploading the results to Xray. If this option is set to true, the settings `client_id`
+and `client_secret` are ignored, and the reporter will produce a `xray-payload.json` file that can be imported separately.
 
 ```ts
 [
@@ -323,7 +327,8 @@ is defined, playwright-xray will only record code defined with `test.step('This 
         uploadVideo: false,
         markFlakyWith: "FLAKY",
         stepCategories: ['test.step'],
-        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`
+        summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`,
+        dryRun: true
       },
     ],
 ```

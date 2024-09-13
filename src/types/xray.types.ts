@@ -29,4 +29,5 @@ export interface XrayOptions {
   markFlakyWith?: string;
   stepCategories: string[];
   summary: string;
+  dryRun?: boolean;
 }

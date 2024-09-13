@@ -8,27 +8,20 @@ import Help from './help';
 import { ExecInfo } from './types/execInfo.types';
 
 export class XrayService {
-  private readonly xray: string;
   private readonly jira: string;
-  private readonly username: string;
-  private readonly password: string;
-  private readonly token: string;
   private readonly type: string;
   private readonly apiVersion: string;
-  private readonly requestUrl: string;
   private readonly options: XrayOptions;
+  private requestUrl: string = '';
   private axios: Axios;
   private help: Help;
+  private dryRun: boolean;
 
   constructor(options: XrayOptions) {
-    // Init vars
-    this.xray = '';
-    this.username = '';
-    this.password = '';
-    this.token = '';
-    this.requestUrl = '';
+    // Init vars    
     this.options = options;
     this.help = new Help(this.options.jira.type);
+    this.dryRun = options.dryRun === true ? true : false;
 
     // Set Jira URL
     if (!options.jira.url) throw new Error('"jira.url" option is missed. Please, provide it in the config');
@@ -51,65 +44,8 @@ export class XrayService {
       Expires: '0',
     };
 
-    switch (this.type) {
-      case 'cloud':
-        // Set Xray Server URL
-        this.xray =
-          options.cloud?.xrayUrl === undefined || !options.cloud?.xrayUrl ? 'https://xray.cloud.getxray.app/' : options.cloud.xrayUrl;
-
-        // Set Xray Credencials
-        if (!options.cloud?.client_id || !options.cloud?.client_secret)
-          throw new Error('"cloud.client_id" and/or "cloud.client_secret" options are missed. Please provide them in the config');
-        this.username = options.cloud?.client_id;
-        this.password = options.cloud?.client_secret;
-
-        // Set Request URL
-        this.requestUrl = new URL('api/v2', this.xray).toString();
-
-        //Create Axios Instance with Auth
-        axios
-          .post(this.requestUrl + '/authenticate', {
-            client_id: this.username,
-            client_secret: this.password,
-          })
-          .then((request) => {
-            this.axios = axios.create({
-              baseURL: this.xray,
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${request.data}`,
-              },
-            });
-          })
-          .catch((error) => {
-            throw new Error(`Failed to authenticate to host ${this.xray} with error: ${error}`);
-          });
-
-        break;
-
-      case 'server':
-        // Set Xray Server URL
-        if (!options.jira?.url) throw new Error('"host" option is missed. Please, provide it in the config');
-        this.xray = options.jira?.url;
-
-        // Set Xray Credencials
-        if (!options.server?.token) throw new Error('"server.token" option is missing. Please provide them in the config');
-        this.token = options.server?.token;
-
-        // Set Request URL
-        this.requestUrl = this.xray + this.apiVersion !== '1.0' ? `rest/raven/${this.apiVersion}/api` : 'rest/raven/1.0';
-
-        //Create Axios Instance with Auth
-        this.axios = axios.create({
-          baseURL: this.xray,
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.token}`,
-          },
-        });
-
-        break;
-    }
+    if (!this.dryRun)
+      this.initialzeJiraConnection(options);
 
     // Set Project Key
     if (!options.projectKey) throw new Error('"projectKey" option is missed. Please, provide it in the config');
@@ -117,6 +53,7 @@ export class XrayService {
     // Set Test Plan
     if (!options.testPlan) throw new Error('"testPlan" option are missed. Please provide them in the config');
   }
+
 
   async createRun(results: XrayTestResult, execInfo: ExecInfo) {
     const URL = `${this.requestUrl}/import/execution`;
@@ -129,11 +66,9 @@ export class XrayService {
 
     try {
       if (this.options.debug) {
-        fs.writeFile('xray-payload-debug.json', JSON.stringify(results), (err) => {
-          if (err) throw err;
-        });
+        fs.writeFileSync('xray-payload-debug.json', JSON.stringify(results));
       }
-    } catch (error) {}
+    } catch (error) { }
     //console.log(results);
     results.tests!.forEach((test: { status: any; testKey: string }) => {
       switch (test.status) {
@@ -156,23 +91,11 @@ export class XrayService {
     });
 
     try {
-      if (this.options.debug) {
-        fs.writeFile('xray-payload.json', JSON.stringify(results), (err) => {
-          if (err) throw err;
-        });
+      if (this.options.debug || this.options.dryRun) {
+       fs.writeFileSync('xray-payload.json', JSON.stringify(results))
       }
 
-      const response = await this.axios.post(URL, JSON.stringify(results), {
-        maxBodyLength: 107374182400, //100gb
-        maxContentLength: 107374182400, //100gb
-        timeout: 600000, //10min
-        proxy: this.options.proxy !== undefined ? this.options.proxy : false,
-      });
-      if (response.status !== 200) throw new Error(`${response.status} - Failed to create test cycle`);
-      let key = response.data.key;
-      if (this.options.jira.type === 'server') {
-        key = response.data.testExecIssue.key;
-      }
+      let key = !this.dryRun ? await this.postResultToJira(URL, results) : 'Dry run';
 
       let action = this.options.testExecution !== undefined ? 'updated' : 'created';
 
@@ -180,7 +103,12 @@ export class XrayService {
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
       console.log(`${bold(blue(` `))}`);
-      console.log(`${bold(green(`😀 Successfully sending test results to Jira`))}`);
+
+      if (this.dryRun)
+        console.log(`${bold(green(`😀 Successfully performed a Dry Run`))}`);
+      else
+        console.log(`${bold(green(`😀 Successfully sending test results to Jira`))}`);
+
       console.log(`${bold(blue(` `))}`);
       if (this.options.description !== undefined) {
         console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Description:       ${this.options.description}`))}`);
@@ -210,10 +138,14 @@ export class XrayService {
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
       console.log(`${bold(blue(` `))}`);
-      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test cycle ${key} has been ${action}`))}`);
-      console.log(`${bold(blue('👇 Check out the test result'))}`);
-      console.log(`${bold(blue(`🔗 ${this.jira}browse/${key}`))}`);
-      console.log(`${bold(blue(` `))}`);
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Test execution ${key} has been ${action}`))}`);
+
+      if (!this.dryRun) {
+        console.log(`${bold(blue('👇 Check out the test result'))}`);
+        console.log(`${bold(blue(`🔗 ${this.jira}browse/${key}`))}`);
+        console.log(`${bold(blue(` `))}`);
+      }
+
       console.log(`${bold(blue(`-------------------------------------`))}`);
     } catch (error) {
       console.log(`${bold(blue(` `))}`);
@@ -223,7 +155,7 @@ export class XrayService {
       let log = '';
       let msg = '';
 
-      if (axios.isAxiosError(error)) {
+      if (axios.isAxiosError(error) && !this.dryRun) {
         log = `Config: ${inspect(error.config)}\n\n`;
 
         if (error.response) {
@@ -255,6 +187,88 @@ export class XrayService {
       console.log(`${bold(blue(` `))}`);
       console.log(`${bold(blue(`-------------------------------------`))}`);
     }
+  }
+
+  private initialzeJiraConnection(options: XrayOptions) {
+    let xray = '';
+    let username = '';
+    let password = '';
+    let token = '';
+    switch (this.type) {
+      case 'cloud':
+        // Set Xray Server URL
+        xray =
+          options.cloud?.xrayUrl === undefined || !options.cloud?.xrayUrl ? 'https://xray.cloud.getxray.app/' : options.cloud.xrayUrl;
+
+        // Set Xray Credencials
+        if (!options.cloud?.client_id || !options.cloud?.client_secret)
+          throw new Error('"cloud.client_id" and/or "cloud.client_secret" options are missed. Please provide them in the config');
+        username = options.cloud?.client_id;
+        password = options.cloud?.client_secret;
+
+        // Set Request URL
+        this.requestUrl = new URL('api/v2', xray).toString();
+
+        //Create Axios Instance with Auth
+        axios
+          .post(this.requestUrl + '/authenticate', {
+            client_id: username,
+            client_secret: password,
+          })
+          .then((request) => {
+            this.axios = axios.create({
+              baseURL: xray,
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${request.data}`,
+              },
+            });
+          })
+          .catch((error) => {
+            throw new Error(`Failed to authenticate to host ${xray} with error: ${error}`);
+          });
+
+        break;
+
+      case 'server':
+        // Set Xray Server URL
+        if (!options.jira?.url) throw new Error('"host" option is missed. Please, provide it in the config');
+        xray = options.jira?.url;
+
+        // Set Xray Credencials
+        if (!options.server?.token) throw new Error('"server.token" option is missing. Please provide them in the config');
+        token = options.server?.token;
+
+        // Set Request URL
+        this.requestUrl = xray + this.apiVersion !== '1.0' ? `rest/raven/${this.apiVersion}/api` : 'rest/raven/1.0';
+
+        //Create Axios Instance with Auth
+        this.axios = axios.create({
+          baseURL: xray,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        break;
+    }
+  }
+
+
+  private async postResultToJira(URL: string, results: XrayTestResult) {
+    const response = await this.axios.post(URL, JSON.stringify(results), {
+      maxBodyLength: 107374182400, //100gb
+      maxContentLength: 107374182400, //100gb
+      timeout: 600000, //10min
+      proxy: this.options.proxy !== undefined ? this.options.proxy : false,
+    });
+    if (response.status !== 200) throw new Error(`${response.status} - Failed to create test cycle`);
+    let key = response.data.key;
+    if (this.options.jira.type === 'server') {
+      key = response.data.testExecIssue.key;
+    }
+    return key;
   }
 
   private isThereFlaky(results: XrayTestResult, test: { status: any; testKey: string }) {
