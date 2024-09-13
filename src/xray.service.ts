@@ -18,7 +18,7 @@ export class XrayService {
   private dryRun: boolean;
 
   constructor(options: XrayOptions) {
-    // Init vars    
+    // Init vars
     this.options = options;
     this.help = new Help(this.options.jira.type);
     this.dryRun = options.dryRun === true ? true : false;
@@ -44,8 +44,7 @@ export class XrayService {
       Expires: '0',
     };
 
-    if (!this.dryRun)
-      this.initialzeJiraConnection(options);
+    if (!this.dryRun) this.initialzeJiraConnection(options);
 
     // Set Project Key
     if (!options.projectKey) throw new Error('"projectKey" option is missed. Please, provide it in the config');
@@ -53,7 +52,6 @@ export class XrayService {
     // Set Test Plan
     if (!options.testPlan) throw new Error('"testPlan" option are missed. Please provide them in the config');
   }
-
 
   async createRun(results: XrayTestResult, execInfo: ExecInfo) {
     const URL = `${this.requestUrl}/import/execution`;
@@ -68,7 +66,7 @@ export class XrayService {
       if (this.options.debug) {
         fs.writeFileSync('xray-payload-debug.json', JSON.stringify(results));
       }
-    } catch (error) { }
+    } catch (error) {}
     //console.log(results);
     results.tests!.forEach((test: { status: any; testKey: string }) => {
       switch (test.status) {
@@ -92,7 +90,7 @@ export class XrayService {
 
     try {
       if (this.options.debug || this.options.dryRun) {
-       fs.writeFileSync('xray-payload.json', JSON.stringify(results))
+        fs.writeFileSync('xray-payload.json', JSON.stringify(results));
       }
 
       let key = !this.dryRun ? await this.postResultToJira(URL, results) : 'Dry run';
@@ -104,10 +102,8 @@ export class XrayService {
       console.log(`${bold(blue(`-------------------------------------`))}`);
       console.log(`${bold(blue(` `))}`);
 
-      if (this.dryRun)
-        console.log(`${bold(green(`😀 Successfully performed a Dry Run`))}`);
-      else
-        console.log(`${bold(green(`😀 Successfully sending test results to Jira`))}`);
+      if (this.dryRun) console.log(`${bold(green(`😀 Successfully performed a Dry Run`))}`);
+      else console.log(`${bold(green(`😀 Successfully sending test results to Jira`))}`);
 
       console.log(`${bold(blue(` `))}`);
       if (this.options.description !== undefined) {
@@ -197,8 +193,7 @@ export class XrayService {
     switch (this.type) {
       case 'cloud':
         // Set Xray Server URL
-        xray =
-          options.cloud?.xrayUrl === undefined || !options.cloud?.xrayUrl ? 'https://xray.cloud.getxray.app/' : options.cloud.xrayUrl;
+        xray = options.cloud?.xrayUrl === undefined || !options.cloud?.xrayUrl ? 'https://xray.cloud.getxray.app/' : options.cloud.xrayUrl;
 
         // Set Xray Credencials
         if (!options.cloud?.client_id || !options.cloud?.client_secret)
@@ -254,7 +249,6 @@ export class XrayService {
         break;
     }
   }
-
 
   private async postResultToJira(URL: string, results: XrayTestResult) {
     const response = await this.axios.post(URL, JSON.stringify(results), {

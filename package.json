@@ -1,6 +1,6 @@
 {
   "name": "playwright-xray",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "XRAY reporter for the Playwright",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
