@@ -130,7 +130,8 @@ const config: PlaywrightTestConfig = {
         markFlakyWith: "FLAKY",
         stepCategories: ['test.step'],
         summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`,
-        dryRun: false
+        dryRun: false,
+        runResult: true
       },
     ],
   ],
@@ -193,6 +194,7 @@ Then run your tests with `npx playwright test` command and you'll see the result
 -------------------------------------
 
 ⏺  Starting the run with 6 tests
+⏺  The following test execution will be imported & reported: Chrome
 
 ✅ Chrome | XRAYISSUE-2 | another test
 ✅ Chrome | XRAYISSUE-1 | basic test
@@ -209,13 +211,13 @@ Then run your tests with `npx playwright test` command and you'll see the result
 ⏺  Test environments: dev,test
 ⏺  Version:           3.5.2
 ⏺  Revision:          12345
-⏺  Browsers:          Chrome, Firefox
+⏺  Browser:           Chrome
 ⏺  Test plan:         XRAYISSUE-123
 ⏺  Test execution:    XRAYISSUE-324
 ⏺  Test Duration:     25s
-⏺  Tests ran:         6 (including reruns)
-⏺  Tests passed:      3
-⏺  Tests failed:      3
+⏺  Tests ran:         3 (including reruns)
+⏺  Tests passed:      2
+⏺  Tests failed:      1
 ⏺  Flaky test:        0
 
 -------------------------------------
@@ -230,6 +232,15 @@ Then run your tests with `npx playwright test` command and you'll see the result
 And you'll see the result in the Xray:
 
 ![alt text](./assets/xray-result.png)
+
+## Multiple Projects
+
+If you need to run multiple browsers, you need to use the project switch and run them after each other, e.g.
+```console
+npx playwright test --project=Chrome 
+npx playwright test --project=Firefox
+```
+If multiple projects are selected in one run, only the first will be reported and imported to Xray. 
 
 ## Multiple Test Plans
 
@@ -308,6 +319,8 @@ is defined, playwright-xray will only record code defined with `test.step('This 
 The option `dryRun` can be used to run the tests without uploading the results to Xray. If this option is set to true, the settings `client_id`
 and `client_secret` are ignored, and the reporter will produce a `xray-payload.json` file that can be imported separately.
 
+The option `runResult` will generate a `runresult.json` file containing a summary of the execution if is set to true (the default is false)
+
 ```ts
 [
       'playwright-xray',
@@ -328,7 +341,8 @@ and `client_secret` are ignored, and the reporter will produce a `xray-payload.j
         markFlakyWith: "FLAKY",
         stepCategories: ['test.step'],
         summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`,
-        dryRun: true
+        dryRun: true,
+        runResult: true
       },
     ],
 ```
