@@ -62,12 +62,12 @@ class XrayReporter implements Reporter {
       this.execInfo.browserName += index > 0 ? ', ' : '';
       this.execInfo.browserName += p.name.charAt(0).toUpperCase() + p.name.slice(1);
     });
-    if (this.options.dryRun)
+    if (this.options.dryRun){
       console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Starting a Dry Run with ${suite.allTests().length} tests`))}`);
-    else
+    } else {
       console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Starting the run with ${suite.allTests().length} tests`))}`);
-
-    //console.log(`${bold(yellow(`⏺  `))}${bold(blue(`The following test execution will be imported & reported:  ${this.execInfo.testedBrowser}`))}`);
+    }
+    
     console.log(`${bold(blue(` `))}`);
   }
 
@@ -81,8 +81,10 @@ class XrayReporter implements Reporter {
     const testCaseId = testCase.title.match(this.testCaseKeyPattern);
     const testCode: string = testCaseId != null ? testCaseId[1]! : '';
     const projectId = JSON.stringify(testCase.parent.project()).match(/__projectId":"(.*)"/)?.[1]
-    if (this.execInfo.testedBrowser !== projectId)
+    if (this.execInfo.testedBrowser !== projectId) {
       return;
+    }
+    
     if (testCode != '') {
       // @ts-ignore
       const finishTime = new Date(result.startTime.getTime() + result.duration);

@@ -46,9 +46,9 @@ export class XrayService {
       Expires: '0',
     };
 
-    if (!this.dryRun)
+    if (!this.dryRun) {
       this.initialzeJiraConnection(options);
-
+    }
     // Set Project Key
     if (!options.projectKey) throw new Error('"projectKey" option is missed. Please, provide it in the config');
 
@@ -85,8 +85,9 @@ export class XrayService {
           break;
         case 'FAIL':
         case 'FAILED':
-          if (this.isThereFlaky(results, test)) flaky = flaky + 1;
-          else {
+          if (this.isThereFlaky(results, test)) {
+            flaky = flaky + 1;
+          } else {
             failed = failed + 1;
             this.removeDuplicates(results, test);
           }
@@ -233,8 +234,10 @@ export class XrayService {
           options.cloud?.xrayUrl === undefined || !options.cloud?.xrayUrl ? 'https://xray.cloud.getxray.app/' : options.cloud.xrayUrl;
 
         // Set Xray Credencials
-        if (!options.cloud?.client_id || !options.cloud?.client_secret)
+        if (!options.cloud?.client_id || !options.cloud?.client_secret) {
           throw new Error('"cloud.client_id" and/or "cloud.client_secret" options are missed. Please provide them in the config');
+        }
+        
         username = options.cloud?.client_id;
         password = options.cloud?.client_secret;
 
