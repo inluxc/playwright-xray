@@ -72,7 +72,7 @@ export class XrayService {
       }
     } catch (error) {
       console.log(`Unable to write xray-payload-debug.json : ${(error as Error).message}`)
-     }
+    }
     //console.log(results);
     results.tests!.forEach((test: { status: any; testKey: string }) => {
       switch (test.status) {
@@ -108,10 +108,11 @@ export class XrayService {
       console.log(`${bold(blue(`-------------------------------------`))}`);
       console.log(`${bold(blue(` `))}`);
 
-      if (this.dryRun)
+      if (this.dryRun) {
         console.log(`${bold(green(`😀 Successfully performed a Dry Run`))}`);
-      else
+      } else {
         console.log(`${bold(green(`😀 Successfully sending test results to Jira`))}`);
+      }
 
       console.log(`${bold(blue(` `))}`);
       if (this.options.description !== undefined) {
@@ -150,7 +151,7 @@ export class XrayService {
         console.log(`${bold(blue(` `))}`);
       }
 
-      if(this.runResult)
+      if (this.runResult)
         writeRunResult(this.options.testPlan);
 
       console.log(`${bold(blue(`-------------------------------------`))}`);
@@ -186,7 +187,7 @@ export class XrayService {
       } catch (error) {
         console.log(`Unable to write playwright-xray-error.log : ${(error as Error).message}`)
       }
-      
+
 
       let msgs = msg.split(';');
       console.log(`${bold(red(`😞 Error sending test results to Jira`))}`);
@@ -216,7 +217,7 @@ export class XrayService {
       } catch (error) {
         console.log(`Unable to write runresult.json : ${(error as Error).message}`)
       }
-      
+
     }
   }
 
