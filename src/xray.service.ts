@@ -275,7 +275,7 @@ export class XrayService {
         token = options.server?.token;
 
         // Set Request URL
-        this.requestUrl = xray + this.apiVersion !== '1.0' ? `rest/raven/${this.apiVersion}/api` : 'rest/raven/1.0';
+        this.requestUrl = xray + (this.apiVersion !== '1.0' ? `rest/raven/${this.apiVersion}/api` : 'rest/raven/1.0');
 
         //Create Axios Instance with Auth
         this.axios = axios.create({
