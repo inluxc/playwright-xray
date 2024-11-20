@@ -30,4 +30,5 @@ export interface XrayOptions {
   stepCategories: string[];
   summary: string;
   dryRun?: boolean;
+  runResult?: boolean;
 }
