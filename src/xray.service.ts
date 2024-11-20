@@ -19,7 +19,7 @@ export class XrayService {
   private runResult: boolean;
 
   constructor(options: XrayOptions) {
-    // Init vars    
+    // Init vars
     this.options = options;
     this.help = new Help(this.options.jira.type);
     this.dryRun = options.dryRun === true ? true : false;
@@ -56,7 +56,6 @@ export class XrayService {
     if (!options.testPlan) throw new Error('"testPlan" option are missed. Please provide them in the config');
   }
 
-
   async createRun(results: XrayTestResult, execInfo: ExecInfo) {
     const URL = `${this.requestUrl}/import/execution`;
     const total = results.tests?.length;
@@ -71,7 +70,7 @@ export class XrayService {
         fs.writeFileSync('xray-payload-debug.json', JSON.stringify(results));
       }
     } catch (error) {
-      console.log(`Unable to write xray-payload-debug.json : ${(error as Error).message}`)
+      console.log(`Unable to write xray-payload-debug.json : ${(error as Error).message}`);
     }
     //console.log(results);
     results.tests!.forEach((test: { status: any; testKey: string }) => {
@@ -97,7 +96,7 @@ export class XrayService {
 
     try {
       if (this.options.debug || this.options.dryRun) {
-        fs.writeFileSync('xray-payload.json', JSON.stringify(results))
+        fs.writeFileSync('xray-payload.json', JSON.stringify(results));
       }
 
       let key = !this.dryRun ? await this.postResultToJira(URL, results) : 'Dry run';
@@ -152,8 +151,7 @@ export class XrayService {
         console.log(`${bold(blue(` `))}`);
       }
 
-      if (this.runResult)
-        writeRunResult(this.options.testPlan);
+      if (this.runResult) writeRunResult(this.options.testPlan);
 
       console.log(`${bold(blue(`-------------------------------------`))}`);
     } catch (error) {
@@ -186,9 +184,8 @@ export class XrayService {
       try {
         fs.writeFileSync('playwright-xray-error.log', log);
       } catch (error) {
-        console.log(`Unable to write playwright-xray-error.log : ${(error as Error).message}`)
+        console.log(`Unable to write playwright-xray-error.log : ${(error as Error).message}`);
       }
-
 
       let msgs = msg.split(';');
       console.log(`${bold(red(`😞 Error sending test results to Jira`))}`);
@@ -204,21 +201,20 @@ export class XrayService {
 
     function writeRunResult(testPlan: string) {
       const runResult = {
-        "browser": execInfo.testedBrowser,
-        "testPlan": testPlan,
-        "testDuration": duration,
-        "testsRun": total,
-        "testsPassed": passed,
-        "testsFailed": failed,
-        "flakyTests": flaky,
-        "skippedTests": skipped
+        browser: execInfo.testedBrowser,
+        testPlan: testPlan,
+        testDuration: duration,
+        testsRun: total,
+        testsPassed: passed,
+        testsFailed: failed,
+        flakyTests: flaky,
+        skippedTests: skipped,
       };
       try {
         fs.writeFileSync('runresult.json', JSON.stringify(runResult));
       } catch (error) {
-        console.log(`Unable to write runresult.json : ${(error as Error).message}`)
+        console.log(`Unable to write runresult.json : ${(error as Error).message}`);
       }
-
     }
   }
 
@@ -230,14 +226,13 @@ export class XrayService {
     switch (this.type) {
       case 'cloud':
         // Set Xray Server URL
-        xray =
-          options.cloud?.xrayUrl === undefined || !options.cloud?.xrayUrl ? 'https://xray.cloud.getxray.app/' : options.cloud.xrayUrl;
+        xray = options.cloud?.xrayUrl === undefined || !options.cloud?.xrayUrl ? 'https://xray.cloud.getxray.app/' : options.cloud.xrayUrl;
 
         // Set Xray Credencials
         if (!options.cloud?.client_id || !options.cloud?.client_secret) {
           throw new Error('"cloud.client_id" and/or "cloud.client_secret" options are missed. Please provide them in the config');
         }
-        
+
         username = options.cloud?.client_id;
         password = options.cloud?.client_secret;
 
@@ -289,7 +284,6 @@ export class XrayService {
         break;
     }
   }
-
 
   private async postResultToJira(URL: string, results: XrayTestResult) {
     const response = await this.axios.post(URL, JSON.stringify(results), {
