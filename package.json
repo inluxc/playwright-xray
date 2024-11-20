@@ -36,6 +36,7 @@
   },
   "homepage": "https://github.com/inluxc/playwright-xray#readme",
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@playwright/test": "^1.30.0",
     "@types/node": "^20.11.25",
     "prettier": "^2.5.1",
