@@ -1,6 +1,6 @@
 import type { XrayTestResult, XrayTestSteps, XrayTestEvidence, XrayTest } from './types/cloud.types';
 import type { XrayOptions } from './types/xray.types';
-import type { Reporter, TestCase, TestResult, FullConfig, Suite } from '@playwright/test/reporter';
+import type { Reporter, TestCase, TestResult, FullConfig, Suite, TestStep } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
 import { blue, bold, green, red, white, yellow } from 'picocolors';
@@ -62,13 +62,31 @@ class XrayReporter implements Reporter {
       this.execInfo.browserName += index > 0 ? ', ' : '';
       this.execInfo.browserName += p.name.charAt(0).toUpperCase() + p.name.slice(1);
     });
-    console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Starting the run with ${suite.allTests().length} tests`))}`);
+    if (this.options.dryRun) {
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Starting a Dry Run with ${suite.allTests().length} tests`))}`);
+    } else {
+      console.log(`${bold(yellow(`⏺  `))}${bold(blue(`Starting the run with ${suite.allTests().length} tests`))}`);
+    }
+
     console.log(`${bold(blue(` `))}`);
   }
 
+  async onTestBegin(test: TestCase) {
+    if (this.execInfo.testedBrowser === undefined) {
+      this.execInfo.testedBrowser = test.parent.parent?.title;
+      console.log(
+        `${bold(yellow(`⏺  `))}${bold(blue(`The following test execution will be imported & reported:  ${this.execInfo.testedBrowser}`))}`,
+      );
+    }
+  }
   async onTestEnd(testCase: TestCase, result: TestResult) {
     const testCaseId = testCase.title.match(this.testCaseKeyPattern);
     const testCode: string = testCaseId != null ? testCaseId[1]! : '';
+    const projectId = JSON.stringify(testCase.parent.project()).match(/__projectId":"(.*)"/)?.[1];
+    if (this.execInfo.testedBrowser !== projectId) {
+      return;
+    }
+
     if (testCode != '') {
       // @ts-ignore
       const finishTime = new Date(result.startTime.getTime() + result.duration);
@@ -92,9 +110,7 @@ class XrayReporter implements Reporter {
           result.steps.map(async (step) => {
             if (this.stepCategories.some((type) => type.includes(step.category))) {
               // Add Step to request
-              const errorMessage = step.error?.stack
-                ?.toString()
-                ?.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+              const errorMessage = this.stripAnsi(step);
               const received = this.receivedRegEx.exec(errorMessage!);
               let dataReceived = '';
               if (received?.[1] !== undefined) {
@@ -131,7 +147,6 @@ class XrayReporter implements Reporter {
 
       xrayTestData.evidence = evidences;
       this.testResults.tests!.push(xrayTestData);
-
       let projectID = '';
       let tst: any = testCase;
       if (tst._projectId !== undefined) {
@@ -155,6 +170,18 @@ class XrayReporter implements Reporter {
       }
     }
   }
+
+  private stripAnsi(step: TestStep) {
+    const ST = '(?:\\u0007|\\u001B\\u005C|\\u009C)';
+    const pattern = [
+      `[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?${ST})`,
+      '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))',
+    ].join('|');
+    let errorMessage = step.error?.stack?.valueOf();
+    errorMessage = errorMessage?.replace(new RegExp(pattern, 'g'), '');
+    return errorMessage;
+  }
+
   async addEvidence(
     attach: { name: string; contentType: string; path?: string | undefined; body?: Buffer | undefined },
     evidences: XrayTestEvidence[],

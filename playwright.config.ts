@@ -19,8 +19,7 @@ const config: PlaywrightTestConfig = {
                     token: '',
                 },
                 projectKey: 'CODE',
-                testPlan: 'CODE-1820',
-                debug: false
+                testPlan: 'CODE-1820'
             },
         ],
     ],

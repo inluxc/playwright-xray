@@ -9,6 +9,7 @@ export interface XrayOptions {
   cloud?: {
     client_id?: string;
     client_secret?: string;
+    xrayUrl?: string;
   };
   server?: {
     token: string;
@@ -28,4 +29,6 @@ export interface XrayOptions {
   markFlakyWith?: string;
   stepCategories: string[];
   summary: string;
+  dryRun?: boolean;
+  runResult?: boolean;
 }
