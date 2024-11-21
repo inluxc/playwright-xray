@@ -1,4 +1,4 @@
-import { AxiosProxyConfig } from 'axios';
+import type { AxiosProxyConfig } from "axios";
 
 export interface XrayOptions {
   jira: {

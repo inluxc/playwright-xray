@@ -17,7 +17,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "allowUnusedLabels": true, 
+    "allowUnusedLabels": true,
     "allowUnreachableCode": true,
     "skipLibCheck": true,
     "outDir": "./lib",
