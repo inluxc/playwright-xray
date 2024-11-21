@@ -148,7 +148,7 @@ class XrayReporter implements Reporter {
       xrayTestData.evidence = evidences;
       this.testResults.tests?.push(xrayTestData);
       let projectID = "";
-      const tst: string = JSON.stringify(testCase.parent.project()).match(/__projectIdd":"(.*)"/)?.[1] as string;      
+      const tst: string = JSON.stringify(testCase.parent.project()).match(/__projectIdd":"(.*)"/)?.[1] as string;
       if (tst !== undefined) {
         projectID = `${tst.charAt(0).toUpperCase() + tst.slice(1)} | `;
       }
