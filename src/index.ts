@@ -218,4 +218,4 @@ class XrayReporter implements Reporter {
 }
 
 export default XrayReporter;
-export * from "./types/xray.types"
+export * from "./types/xray.types";
