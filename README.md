@@ -289,6 +289,37 @@ npx playwright test --config=configs/TCK-87.config.ts
 
 If no config file is chosen, the default config file "playwright.config.ts" will be used.
 
+## Expose reporter options type
+In order to enable IntelliSense to provide useful suggestions and avoid potential typos not being detected,
+you can import XrayOptions in the "playwright.config.ts" file and use the TypeScript satisfies operator on the
+playwright-xray configuration block. E.g:
+
+```ts
+import { PlaywrightTestConfig } from '@playwright/test';
+import type { XrayOptions } from 'playwright-xray';
+
+const config: PlaywrightTestConfig = {
+
+  reporter: [
+    [
+      'playwright-xray',
+      {
+        jira: {
+          url: 'https://your-jira-url',
+          type: 'server',
+          apiVersion: '1.0',
+        },
+        server: {
+          token: 'YOUR_SERVER_TOKEN',
+        },
+        projectKey: 'TCK'
+      } satisfies XrayOptions,
+    ],
+  ],
+};
+
+```
+
 ## Notes
 
 - To have the steps imported you have to create them in the test issue itself.
