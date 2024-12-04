@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { FullConfig, Reporter, Suite, TestCase, TestResult, TestStep } from "@playwright/test/reporter";
+import type { FullConfig, Reporter, Suite, TestCase, TestResult } from "@playwright/test/reporter";
 import { blue, bold, green, red, white, yellow } from "picocolors";
 import type { XrayTest, XrayTestEvidence, XrayTestResult, XrayTestSteps } from "./types/cloud.types";
 import type { XrayOptions } from "./types/xray.types";
@@ -104,13 +104,13 @@ class XrayReporter implements Reporter {
       // Set Test Error
       const pwStepsExists = result.steps.some((step) => step.category.includes("test.step"));
       if (result.errors.length > 0 && !pwStepsExists) {
-        xrayTestData.comment = JSON.stringify(result.errors);
+        xrayTestData.comment = this.stripAnsi(JSON.stringify(result.errors).replace(/\\\\/g, "\\"));
       } else {
         await Promise.all(
           result.steps.map(async (step) => {
             if (this.stepCategories.some((type) => type.includes(step.category))) {
               // Add Step to request
-              const errorMessage = this.stripAnsi(step);
+              const errorMessage = this.stripAnsi(step.error?.stack?.valueOf() as string);
               const received = errorMessage ? this.receivedRegEx.exec(errorMessage) : null;
               let dataReceived = "";
               if (received?.[1] !== undefined) {
@@ -170,14 +170,20 @@ class XrayReporter implements Reporter {
     }
   }
 
-  private stripAnsi(step: TestStep) {
+  private stripAnsi(step: string) {
+    if (step === undefined) {
+      return "";
+    }
     const ST = "(?:\\u0007|\\u001B\\u005C|\\u009C)";
     const pattern = [
       `[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?${ST})`,
       "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))",
     ].join("|");
-    let errorMessage = step.error?.stack?.valueOf();
-    errorMessage = errorMessage?.replace(new RegExp(pattern, "g"), "");
+    let errorMessage = step.replace(new RegExp(pattern, "g"), "");
+    errorMessage = errorMessage.replace(
+      /(\\u001b)(8|7|H|>|\[(\?\d+(h|l)|[0-2]?(K|J)|\d*(A|B|C|D\D|E|F|G|g|i|m|n|S|s|T|u)|1000D\d+|\d*;\d*(f|H|r|m)|\d+;\d+;\d+m))/g,
+      "",
+    );
     return errorMessage;
   }
 
