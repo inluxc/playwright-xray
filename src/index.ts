@@ -171,7 +171,7 @@ class XrayReporter implements Reporter {
   }
 
   private stripAnsi(step: string) {
-    if(step === undefined){
+    if (step === undefined) {
       return "";
     }
     const ST = "(?:\\u0007|\\u001B\\u005C|\\u009C)";
