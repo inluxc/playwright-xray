@@ -4,9 +4,7 @@
   "description": "XRAY reporter for the Playwright",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "files": [
-    "lib"
-  ],
+  "files": ["lib"],
   "scripts": {
     "prepare": "npm run build",
     "version": "npm run format",
@@ -22,13 +20,7 @@
     "type": "git",
     "url": "git+https://github.com/inluxc/playwright-xray.git"
   },
-  "keywords": [
-    "playwright",
-    "xray",
-    "reporter",
-    "typescript",
-    "tools"
-  ],
+  "keywords": ["playwright", "xray", "reporter", "typescript", "tools"],
   "author": "Fúlvio Carvalhido <inluxc@gmail.com>",
   "license": "MIT",
   "bugs": {
