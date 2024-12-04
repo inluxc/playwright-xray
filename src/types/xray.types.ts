@@ -27,8 +27,8 @@ export interface XrayOptions {
   uploadTrace?: boolean;
   uploadVideo?: boolean;
   markFlakyWith?: string;
-  stepCategories: string[];
-  summary: string;
+  stepCategories?: string[];
+  summary?: string;
   dryRun?: boolean;
   runResult?: boolean;
 }
