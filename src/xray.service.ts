@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import { inspect } from "node:util";
 import axios, { type Axios } from "axios";
-import { blue, bold, green, red, white, yellow } from "picocolors";
+import { logger } from "./logger";
 import Help from "./help";
 import type { XrayTestResult } from "./types/cloud.types";
 import type { ExecInfo } from "./types/execInfo.types";
@@ -114,7 +114,7 @@ export class XrayService {
         //console.log(`${bold(green("😀 Successfully sending test results to Jira"))}`);
       }
 
-      console.log(`${bold(blue(" "))}`);
+      logger.logEmptyLine();
       if (this.options.description !== undefined) {
         logger.info(`Description:       ${this.options.description}`);
         //console.log(`${bold(yellow("⏺  "))}${bold(blue(`Description:       ${this.options.description}`))}`);
@@ -173,7 +173,7 @@ export class XrayService {
 
       if (this.runResult) writeRunResult(this.options.testPlan);
 
-      console.log(`${bold(blue("-------------------------------------"))}`);
+      logger.separator();
     } catch (error) {
       logger.separator();
       //console.log(`${bold(blue(" "))}`);
