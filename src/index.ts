@@ -177,14 +177,20 @@ class XrayReporter implements Reporter {
     }
   }
 
-  private stripAnsi(step: TestStep): string | undefined {
-    const ST = "(?:\\u0007|\\u001B\\u005C|\\u009C)";
+  private stripAnsi(step: string) {
+    if (step === undefined) {
+      return '';
+    }
+    const ST = '(?:\\u0007|\\u001B\\u005C|\\u009C)';
     const pattern = [
       `[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?${ST})`,
       "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))",
-    ].join("|");
-    let errorMessage = step.error?.stack?.valueOf();
-    errorMessage = errorMessage?.replace(new RegExp(pattern, "g"), "");
+    ].join('|');
+    let errorMessage = step.replace(new RegExp(pattern, "g"), "");
+    errorMessage = errorMessage.replace(
+      /(\\u001b)(8|7|H|>|\[(\?\d+(h|l)|[0-2]?(K|J)|\d*(A|B|C|D\D|E|F|G|g|i|m|n|S|s|T|u)|1000D\d+|\d*;\d*(f|H|r|m)|\d+;\d+;\d+m))/g,
+      '',
+    );
     return errorMessage;
   }
 
