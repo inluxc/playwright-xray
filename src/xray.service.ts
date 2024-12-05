@@ -6,7 +6,6 @@ import Help from "./help";
 import type { XrayTestResult } from "./types/cloud.types";
 import type { ExecInfo } from "./types/execInfo.types";
 import type { XrayOptions } from "./types/xray.types";
-import { logger } from "./logger";
 
 export class XrayService {
   private readonly jira: string;
