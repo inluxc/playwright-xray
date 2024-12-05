@@ -1,13 +1,13 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type { FullConfig, Reporter, Suite, TestCase, TestResult, TestStep } from "@playwright/test/reporter";
-import { blue, bold, green, red, white, yellow } from "picocolors";
 import type { XrayTest, XrayTestEvidence, XrayTestResult, XrayTestSteps } from "./types/cloud.types";
 import type { XrayOptions } from "./types/xray.types";
 
 import Help from "./help";
 import type { ExecInfo } from "./types/execInfo.types";
 import { XrayService } from "./xray.service";
+import { logger } from "./logger";
 
 class XrayReporter implements Reporter {
   private xrayService!: XrayService;
@@ -49,8 +49,9 @@ class XrayReporter implements Reporter {
       tests: [] as XrayTest[],
     };
     this.testResults = testResults;
-    console.log(`${bold(blue("-------------------------------------"))}`);
-    console.log(`${bold(blue(" "))}`);
+    logger.separator();
+    //console.log(`${bold(blue("-------------------------------------"))}`);
+    //console.log(`${bold(blue(" "))}`);
     if (this.options.summary !== undefined) testResults.info.summary = this.options.summary;
     this.execInfo = {
       browserName: "",
@@ -63,20 +64,23 @@ class XrayReporter implements Reporter {
       this.execInfo.browserName += p.name.charAt(0).toUpperCase() + p.name.slice(1);
     });
     if (this.options.dryRun) {
-      console.log(`${bold(yellow("⏺  "))}${bold(blue(`Starting a Dry Run with ${suite.allTests().length} tests`))}`);
+      logger.info(`Starting a Dry Run with ${suite.allTests().length} tests`);
+      //console.log(`${bold(yellow("⏺  "))}${bold(blue(`Starting a Dry Run with ${suite.allTests().length} tests`))}`);
     } else {
-      console.log(`${bold(yellow("⏺  "))}${bold(blue(`Starting the run with ${suite.allTests().length} tests`))}`);
+      logger.info(`Starting the run with ${suite.allTests().length} tests`);
+      //console.log(`${bold(yellow("⏺  "))}${bold(blue(`Starting the run with ${suite.allTests().length} tests`))}`);
     }
-
-    console.log(`${bold(blue(" "))}`);
+    logger.logEmptyLine();
+    //console.log(`${bold(blue(" "))}`);
   }
 
   async onTestBegin(test: TestCase) {
     if (this.execInfo.testedBrowser === undefined) {
       this.execInfo.testedBrowser = test.parent.parent?.title;
-      console.log(
+      logger.info(`The following test execution will be imported & reported:  ${this.execInfo.testedBrowser}`);
+      /* console.log(
         `${bold(yellow("⏺  "))}${bold(blue(`The following test execution will be imported & reported:  ${this.execInfo.testedBrowser}`))}`,
-      );
+      );*/
     }
   }
   async onTestEnd(testCase: TestCase, result: TestResult) {
@@ -156,21 +160,24 @@ class XrayReporter implements Reporter {
       switch (this.help.convertPwStatusToXray(result.status)) {
         case "PASS":
         case "PASSED":
-          console.log(`${bold(green(`✅ ${projectID}${testCase.title}`))}`);
+          logger.info(`✅ ${projectID}${testCase.title}`);
+          //console.log(`${bold(green(`✅ ${projectID}${testCase.title}`))}`);
           break;
         case "FAIL":
         case "FAILED":
-          console.log(`${bold(red(`⛔ ${projectID}${testCase.title}`))}`);
+          logger.error(`⛔ ${projectID}${testCase.title}`);
+          //console.log(`${bold(red(`⛔ ${projectID}${testCase.title}`))}`);
           break;
         case "SKIPPED":
         case "ABORTED":
-          console.log(`${bold(white(`🚫 ${projectID}${testCase.title}`))}`);
+          logger.warn(`🚫 ${projectID}${testCase.title}`);
+          // console.log(`${bold(white(`🚫 ${projectID}${testCase.title}`))}`);
           break;
       }
     }
   }
 
-  private stripAnsi(step: TestStep) {
+  private stripAnsi(step: TestStep): string | undefined {
     const ST = "(?:\\u0007|\\u001B\\u005C|\\u009C)";
     const pattern = [
       `[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?${ST})`,
@@ -212,7 +219,8 @@ class XrayReporter implements Reporter {
     if (typeof this.testResults !== "undefined" && typeof this.testResults.tests !== "undefined" && this.testResults.tests.length > 0) {
       await this.xrayService.createRun(this.testResults, this.execInfo);
     } else {
-      console.log(`There are no tests with such ${this.testCaseKeyPattern} key pattern`);
+      logger.error(`There are no tests with such ${this.testCaseKeyPattern} key pattern`);
+      //console.log(`There are no tests with such ${this.testCaseKeyPattern} key pattern`);
     }
   }
 }
