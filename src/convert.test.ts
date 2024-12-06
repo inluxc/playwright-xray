@@ -138,7 +138,7 @@ describe(convertToXrayJson.name, async () => {
       [
         {
           testKey: "ABC-123",
-          status: "FAIL",
+          status: "PASS",
           start: "1970-01-01T01:00:00+01:00",
           finish: "1970-01-01T01:00:05+01:00",
           iterations: [
@@ -212,7 +212,7 @@ describe(convertToXrayJson.name, async () => {
       [
         {
           testKey: "ABC-123",
-          status: "FAILED",
+          status: "PASSED",
           start: "1970-01-01T00:00:00.000Z",
           finish: "1970-01-01T00:00:05.000Z",
           iterations: [
@@ -378,7 +378,7 @@ describe(convertToXrayJson.name, async () => {
       [
         {
           testKey: "ABC-123",
-          status: "FAILED",
+          status: "PASSED",
           start: "2024-12-05T17:10:51.328Z",
           finish: "2024-12-05T17:10:53.925Z",
           iterations: [

@@ -3,9 +3,13 @@ import { inspect } from 'node:util';
 import axios, { type Axios } from 'axios';
 import { blue, bold, green, red, white, yellow } from 'picocolors';
 import Help from './help';
-import type { XrayTestResult } from './types/cloud.types';
+import type { XrayTest as XrayTestCloud, XrayTestResult as XrayTestResultCloud } from "./types/cloud.types";
 import type { ExecInfo } from './types/execInfo.types';
 import type { XrayOptions } from './types/xray.types';
+import type { XrayTestResult as XrayTestResultServer, XrayTest as XrayTestServer } from "./types/server.types";
+
+type XrayTestResult = XrayTestResultCloud | XrayTestResultServer;
+type XrayTest = XrayTestCloud | XrayTestServer;
 
 export class XrayService {
   private readonly jira: string;
@@ -80,16 +84,15 @@ export class XrayService {
           break;
         case 'PASS':
         case 'PASSED':
-          passed = passed + 1;
+          if (this.isFlaky(test)) {
+            flaky = flaky + 1;
+          } else {
+            passed = passed + 1;
+          }
           break;
         case 'FAIL':
         case 'FAILED':
-          if (this.isThereFlaky(results, test)) {
-            flaky = flaky + 1;
-          } else {
-            failed = failed + 1;
-            this.removeDuplicates(results, test);
-          }
+          failed = failed + 1;
           break;
       }
     }
@@ -300,30 +303,19 @@ export class XrayService {
     return key;
   }
 
-  private isThereFlaky(results: XrayTestResult, test: { status: string; testKey: string }) {
-    const flaky = results.tests?.find((item) => item.testKey.includes(test.testKey) && item.status.includes('PASSED'));
-    if (flaky !== undefined) {
-      const passed = results.tests?.at(results.tests.indexOf(flaky));
-      if (passed !== undefined) passed.status = this.options.markFlakyWith === undefined ? 'PASSED' : this.options.markFlakyWith;
-
-      const duplicates = results.tests?.filter((item) => item.testKey.includes(test.testKey) && item.status.includes('FAILED'));
-      if (duplicates) {
-        for (const duplicate of duplicates) {
-          results.tests?.splice(results.tests?.indexOf(duplicate), 1);
-        }
+  private isFlaky(test: XrayTest) {
+    if (
+      test.iterations?.some(
+        (iteration) =>
+          iteration.status === this.help.convertPwStatusToXray("failed") ||
+          iteration.status === this.help.convertPwStatusToXray("timedOut"),
+      )
+    ) {
+      if (this.options.markFlakyWith) {
+        test.status = this.options.markFlakyWith;
       }
       return true;
     }
     return false;
-  }
-
-  private removeDuplicates(results: XrayTestResult, test: { status: string; testKey: string }) {
-    const duplicates = results.tests?.filter((item) => item.testKey.includes(test.testKey) && item.status.includes('FAILED'));
-    duplicates?.pop();
-    if (duplicates) {
-      for (const duplicate of duplicates) {
-        results.tests?.splice(results.tests?.indexOf(duplicate), 1);
-      }
-    }
   }
 }

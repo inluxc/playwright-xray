@@ -94,7 +94,7 @@ async function getTest(issueKey: string, results: TestResult[], options: Convers
 }
 
 function getTestStatus(iterations: TestResult[], options: ConversionOptions) {
-  if (iterations.some((iteration) => iteration.status === "failed" || iteration.status === "timedOut")) {
+  if (iterations.every((iteration) => iteration.status === "failed" || iteration.status === "timedOut")) {
     return getIterationStatus("failed", options);
   }
   if (iterations.some((iteration) => iteration.status === "interrupted")) {
@@ -103,6 +103,7 @@ function getTestStatus(iterations: TestResult[], options: ConversionOptions) {
   if (iterations.every((iteration) => iteration.status === "skipped")) {
     return getIterationStatus("skipped", options);
   }
+  // Note: flaky tests are also considered passing by default.
   return getIterationStatus("passed", options);
 }
 
