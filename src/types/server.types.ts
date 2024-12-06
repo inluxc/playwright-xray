@@ -1,11 +1,11 @@
 type XrayServerStatusType = { [key: string]: string };
 
 export const XrayServerStatus: XrayServerStatusType = {
-  passed: 'PASS',
-  failed: 'FAIL',
-  skipped: 'SKIPPED',
-  timedOut: 'FAIL',
-  interrupted: 'ABORTED',
+  passed: "PASS",
+  failed: "FAIL",
+  skipped: "SKIPPED",
+  timedOut: "FAIL",
+  interrupted: "ABORTED",
 };
 
 export interface XrayTestResult {

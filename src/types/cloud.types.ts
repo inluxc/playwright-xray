@@ -1,17 +1,17 @@
 type XrayCloudStatusType = { [key: string]: string };
 
 export const XrayCloudStatus: XrayCloudStatusType = {
-  passed: 'PASSED',
-  failed: 'FAILED',
-  skipped: 'SKIPPED',
-  timedOut: 'FAILED',
-  interrupted: 'ABORTED',
+  passed: "PASSED",
+  failed: "FAILED",
+  skipped: "SKIPPED",
+  timedOut: "FAILED",
+  interrupted: "ABORTED",
 };
 
 export interface XrayTestResult {
   testExecutionKey?: string;
   info: XrayInfo;
-  tests: XrayTest[];
+  tests?: XrayTest[];
 }
 
 export interface XrayInfo {

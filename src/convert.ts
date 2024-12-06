@@ -1,20 +1,20 @@
-import type { TestResult, TestStatus } from '@playwright/test/reporter';
-import fs from 'node:fs';
-import path from 'node:path';
-import Help from './help';
+import type { TestResult, TestStatus } from "@playwright/test/reporter";
+import fs from "node:fs";
+import path from "node:path";
+import Help from "./help";
 import {
   XrayCloudStatus,
   type XrayTest as XrayTestCloud,
   type XrayTestEvidence as XrayTestEvidenceCloud,
   type XrayTestIteration as XrayTestIterationCloud,
-} from './types/cloud.types';
+} from "./types/cloud.types";
 import {
   XrayServerStatus,
   type XrayTestEvidence as XrayTestEvidenceServer,
   type XrayTestIteration as XrayTestIterationServer,
   type XrayTest as XrayTestServer,
   type XrayTestStep as XrayTestStepServer,
-} from './types/server.types';
+} from "./types/server.types";
 
 type XrayTest = XrayTestServer | XrayTestCloud;
 type XrayTestIteration = XrayTestIterationServer | XrayTestIterationCloud;
@@ -41,7 +41,7 @@ export async function convertToXrayJson(groupedResults: Map<string, TestResult[]
 }
 
 type ConversionOptions = {
-  jiraType: 'server' | 'cloud';
+  jiraType: "server" | "cloud";
   stepCategories: string[];
   receivedRegEx: RegExp;
   uploadScreenshot?: boolean;
@@ -53,7 +53,7 @@ async function getTest(issueKey: string, results: TestResult[], options: Convers
   const help = new Help(options.jiraType);
   let xrayTest: XrayTest;
 
-  if (options.jiraType === 'cloud') {
+  if (options.jiraType === "cloud") {
     xrayTest = {
       status: getTestStatus(results, options),
       testKey: issueKey,
@@ -72,9 +72,9 @@ async function getTest(issueKey: string, results: TestResult[], options: Convers
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
       iterations.push({
-        status: XrayCloudStatus[result.status],
+        status: getIterationStatus(result.status, options),
         // TODO: Add way to access user-defined parameters here.
-        parameters: [{ name: 'iteration', value: (iterations.length + 1).toString() }],
+        parameters: [{ name: "iteration", value: (iterations.length + 1).toString() }],
         steps: getSteps(result, options),
       });
     }
@@ -94,25 +94,25 @@ async function getTest(issueKey: string, results: TestResult[], options: Convers
 }
 
 function getTestStatus(iterations: TestResult[], options: ConversionOptions) {
-  if (iterations.some((iteration) => iteration.status === 'failed' || iteration.status === 'timedOut')) {
-    return getIterationStatus('failed', options);
+  if (iterations.some((iteration) => iteration.status === "failed" || iteration.status === "timedOut")) {
+    return getIterationStatus("failed", options);
   }
-  if (iterations.some((iteration) => iteration.status === 'interrupted')) {
-    return getIterationStatus('interrupted', options);
+  if (iterations.some((iteration) => iteration.status === "interrupted")) {
+    return getIterationStatus("interrupted", options);
   }
-  if (iterations.every((iteration) => iteration.status === 'skipped')) {
-    return getIterationStatus('skipped', options);
+  if (iterations.every((iteration) => iteration.status === "skipped")) {
+    return getIterationStatus("skipped", options);
   }
-  return getIterationStatus('passed', options);
+  return getIterationStatus("passed", options);
 }
 
 function getIterationStatus(status: TestStatus, options: ConversionOptions) {
-  return options.jiraType === 'server' ? XrayServerStatus[status] : XrayCloudStatus[status];
+  return options.jiraType === "server" ? XrayServerStatus[status] : XrayCloudStatus[status];
 }
 
 function getComment(result: TestResult) {
   if (result.errors.length > 0) {
-    return stripAnsi(JSON.stringify(result.errors).replace(/\\\\/g, '\\'));
+    return stripAnsi(JSON.stringify(result.errors).replace(/\\\\/g, "\\"));
   }
   return undefined;
 }
@@ -125,7 +125,7 @@ function getCommentIterations(iterations: TestResult[]) {
       errors.push(`Iteration ${i + 1}: ${comment}`);
     }
   }
-  return errors.join('\n');
+  return errors.join("\n");
 }
 
 function getSteps(result: TestResult, options: ConversionOptions) {
@@ -135,13 +135,13 @@ function getSteps(result: TestResult, options: ConversionOptions) {
       // Add Step to request
       const errorMessage = stripAnsi(step.error?.stack?.valueOf() as string);
       const received = errorMessage ? options.receivedRegEx.exec(errorMessage) : null;
-      let dataReceived = '';
+      let dataReceived = "";
       if (received?.[1] !== undefined) {
         dataReceived = received?.[1];
       }
       const xrayTestStep: XrayTestStep = {
-        status: step.error !== undefined ? getIterationStatus('failed', options) : getIterationStatus('passed', options),
-        comment: step.error !== undefined ? errorMessage : '',
+        status: step.error !== undefined ? getIterationStatus("failed", options) : getIterationStatus("passed", options),
+        comment: step.error !== undefined ? errorMessage : "",
         actualResult: dataReceived,
       };
       steps.push(xrayTestStep);
@@ -175,13 +175,13 @@ async function getEvidence(result: TestResult, options: ConversionOptions, prefi
   if (result.attachments.length > 0) {
     await Promise.all(
       result.attachments.map(async (attach) => {
-        if (attach.name.includes('screenshot') && options.uploadScreenshot) {
+        if (attach.name.includes("screenshot") && options.uploadScreenshot) {
           await addEvidence(attach, evidences, prefix);
         }
-        if (attach.name.includes('trace') && options.uploadTrace) {
+        if (attach.name.includes("trace") && options.uploadTrace) {
           await addEvidence(attach, evidences, prefix);
         }
-        if (attach.name.includes('video') && options.uploadVideo) {
+        if (attach.name.includes("video") && options.uploadVideo) {
           await addEvidence(attach, evidences, prefix);
         }
       }),
@@ -192,27 +192,27 @@ async function getEvidence(result: TestResult, options: ConversionOptions, prefi
 
 function stripAnsi(step: string) {
   if (step === undefined) {
-    return '';
+    return "";
   }
-  const ST = '(?:\\u0007|\\u001B\\u005C|\\u009C)';
+  const ST = "(?:\\u0007|\\u001B\\u005C|\\u009C)";
   const pattern = [
     `[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?${ST})`,
-    '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))',
-  ].join('|');
-  let errorMessage = step.replace(new RegExp(pattern, 'g'), '');
+    "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))",
+  ].join("|");
+  let errorMessage = step.replace(new RegExp(pattern, "g"), "");
   errorMessage = errorMessage.replace(
     /(\\u001b)(8|7|H|>|\[(\?\d+(h|l)|[0-2]?(K|J)|\d*(A|B|C|D\D|E|F|G|g|i|m|n|S|s|T|u)|1000D\d+|\d*;\d*(f|H|r|m)|\d+;\d+;\d+m))/g,
-    '',
+    "",
   );
   return errorMessage;
 }
 
-async function addEvidence(attach: TestResult['attachments'][number], evidences: XrayTestEvidence[], prefix?: string) {
+async function addEvidence(attach: TestResult["attachments"][number], evidences: XrayTestEvidence[], prefix?: string) {
   if (!attach.path) {
-    throw new Error('Attachment path is undefined');
+    throw new Error("Attachment path is undefined");
   }
-  const filename = `${prefix ?? ''}${path.basename(attach.path)}`;
-  const attachData = fs.readFileSync(attach.path, { encoding: 'base64' });
+  const filename = `${prefix ?? ""}${path.basename(attach.path)}`;
+  const attachData = fs.readFileSync(attach.path, { encoding: "base64" });
   const evid: XrayTestEvidence = {
     data: attachData,
     filename: filename,
