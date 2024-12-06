@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { XrayCloudStatus } from './types/cloud.types';
 import { XrayServerStatus } from './types/server.types';
+import type { TestStatus } from '@playwright/test/reporter';
 
 class Help {
   public jiraType = '';
@@ -8,7 +9,7 @@ class Help {
     this.jiraType = jiraType;
   }
 
-  convertPwStatusToXray(status: string): string {
+  convertPwStatusToXray(status: TestStatus): string {
     switch (this.jiraType) {
       case 'cloud':
         return XrayCloudStatus[status];
