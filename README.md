@@ -289,6 +289,33 @@ npx playwright test --config=configs/TCK-87.config.ts
 
 If no config file is chosen, the default config file "playwright.config.ts" will be used.
 
+## Xray Iteration Support
+
+The reporter supports data-driven tests and retries, mapping each run of the same test to an [iteration](https://docs.getxray.app/display/XRAYCLOUD/Parameterized+Tests) in Xray.
+
+```typescript
+for (const url of ['https://example.org', 'https://playwright.dev']) {
+  test(`J42 | visit ${url}`, async ({ page }) => {
+    await page.goto(url);
+    await expect(page.locator('body')).toBeVisible();
+  });
+}
+```
+
+![xray iteration results](./assets/xray-iterations.png)
+
+When uploading, evidence for individual test runs is added to the test execution itself, as Xray does not support adding evidence to iterations outside of steps.
+
+The reporter calculates Xray statuses for tests with iterations as follows:
+
+- tests with iterations are considered passed if at least one iteration passed
+- tests with iterations are considered failed if all iterations failed or timed out
+- if there is at least one passed iteration, one failed iteration _and_ the the flaky flag is defined, the test will be reported as flaky
+
+> [!NOTE]
+> Please note that there is currently no detailed parameter mapping for the created iterations.
+> Instead of any actual parameters that might be defined in the test cases, each Xray iteration will have a single parameter called `iteration` with its value set to the iteration index (starting at 1).
+
 ## Expose reporter options type
 In order to enable IntelliSense to provide useful suggestions and avoid potential typos not being detected,
 you can import XrayOptions in the "playwright.config.ts" file and use the TypeScript satisfies operator on the
