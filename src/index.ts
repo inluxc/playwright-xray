@@ -75,10 +75,10 @@ class XrayReporter implements Reporter {
   async onTestBegin(test: TestCase) {
     if (this.execInfo.testedBrowser === undefined) {
       this.execInfo.testedBrowser = test.parent.parent?.title;
-      console.log(
-        `${bold(yellow('⏺  '))}${bold(blue(`The following test execution will be imported & reported:  ${this.execInfo.testedBrowser}`))}`,
-      );
     }
+    console.log(
+      `${bold(yellow('⏺  '))}${bold(blue(`The following test execution will be imported & reported:  ${this.execInfo.testedBrowser}`))}`,
+    );
   }
   async onTestEnd(testCase: TestCase, result: TestResult) {
     const testCaseId = testCase.title.match(this.testCaseKeyPattern);
