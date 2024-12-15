@@ -3,10 +3,10 @@ import { inspect } from 'node:util';
 import axios, { type Axios } from 'axios';
 import { blue, bold, green, red, white, yellow } from 'picocolors';
 import Help from './help';
-import type { XrayTest as XrayTestCloud, XrayTestResult as XrayTestResultCloud } from "./types/cloud.types";
+import type { XrayTest as XrayTestCloud, XrayTestResult as XrayTestResultCloud } from './types/cloud.types';
 import type { ExecInfo } from './types/execInfo.types';
 import type { XrayOptions } from './types/xray.types';
-import type { XrayTestResult as XrayTestResultServer, XrayTest as XrayTestServer } from "./types/server.types";
+import type { XrayTestResult as XrayTestResultServer, XrayTest as XrayTestServer } from './types/server.types';
 
 type XrayTestResult = XrayTestResultCloud | XrayTestResultServer;
 type XrayTest = XrayTestCloud | XrayTestServer;
@@ -307,8 +307,8 @@ export class XrayService {
     if (
       test.iterations?.some(
         (iteration) =>
-          iteration.status === this.help.convertPwStatusToXray("failed") ||
-          iteration.status === this.help.convertPwStatusToXray("timedOut"),
+          iteration.status === this.help.convertPwStatusToXray('failed') ||
+          iteration.status === this.help.convertPwStatusToXray('timedOut'),
       )
     ) {
       if (this.options.markFlakyWith) {
