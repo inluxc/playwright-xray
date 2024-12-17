@@ -53,15 +53,14 @@ class XrayReporter implements Reporter {
     if (this.options.summary !== undefined) this.testResults.info.summary = this.options.summary;
     this.execInfo = {
       browserName: '',
-      testedBrowser: undefined,
+      testedBrowser: options.testedBrowser || undefined,
     };
   }
 
   onBegin(config: FullConfig, suite: Suite) {
-    config.projects.forEach((p, index) => {
+    config.projects.filter((p) => !/^(setup | cleanup)$/.test(p.name)).forEach((p, index) => {
       this.execInfo.browserName += index > 0 ? ', ' : '';
       this.execInfo.browserName += p.name.charAt(0).toUpperCase() + p.name.slice(1);
-      this.execInfo.testedBrowser = /^(cleanup | setup)$/.test(p.name) ? undefined : p.name;
     });
     if (this.options.dryRun) {
       console.log(`${bold(yellow('⏺  '))}${bold(blue(`Starting a Dry Run with ${suite.allTests().length} tests`))}`);

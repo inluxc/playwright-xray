@@ -92,6 +92,8 @@ test('J79 | basic test', async ({ page }) => {
 
 Is it possible to add some optional values to the Test Execution ticket.
 
+`testedBrowser` - The browser that should be reported to XRAY. Default is `undefined`. Othervise set it to equal the name field of project in `playwright.config.ts`. E.g. `chromium`, `firefox`, `webkit`.
+
 ```typescript
 // playwright.config.ts
 import { PlaywrightTestConfig } from '@playwright/test';
@@ -131,7 +133,8 @@ const config: PlaywrightTestConfig = {
         stepCategories: ['test.step'],
         summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`,
         dryRun: false,
-        runResult: true
+        runResult: true,
+        testedBrowser: 'chromium',
       },
     ],
   ],
