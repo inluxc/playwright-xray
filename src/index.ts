@@ -20,6 +20,7 @@ class XrayReporter implements Reporter {
   private uploadScreenShot: boolean | undefined;
   private uploadTrace: boolean | undefined;
   private uploadVideo: boolean | undefined;
+  private projectsToExclude: string | string[] | undefined;
   private stepCategories = ['expect', 'pw:api', 'test.step'];
   private readonly testsByKey: Map<string, TestResult[]>;
 
@@ -48,18 +49,44 @@ class XrayReporter implements Reporter {
       },
       tests: [] as XrayTest[],
     };
+    this.projectsToExclude = this.options.projectsToExclude;
     console.log(`${bold(blue('-------------------------------------'))}`);
     console.log(`${bold(blue(' '))}`);
     if (this.options.summary !== undefined) this.testResults.info.summary = this.options.summary;
     this.execInfo = {
       browserName: '',
+      testedBrowser: undefined,
     };
   }
 
   onBegin(config: FullConfig, suite: Suite) {
-    config.projects.forEach((p, index) => {
+    let projectsToReport: Record<string, any>[] = [];
+    let regexOfExcludedProjects: RegExp;
+    // Exclude projects from the report
+    // If the projectsToExclude is an array, we will use the regex to exclude the projects
+    if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== 'string' && this.projectsToExclude.length > 1) {
+      regexOfExcludedProjects = new RegExp(`^(${this.projectsToExclude.join('|')})$`);
+      projectsToReport = config.projects.filter((p) => !regexOfExcludedProjects.test(p.name));
+    // If the projectsToExclude is a string, we will use the regex to exclude the projects
+    } else if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== 'string') {
+      regexOfExcludedProjects = new RegExp(`^(${this.projectsToExclude.join('')})$`);
+      projectsToReport = config.projects.filter((p) => !regexOfExcludedProjects.test(p.name));
+    // If the projectsToExclude is a string, we will use the regex to exclude the projects
+    } else if (this.projectsToExclude !== undefined && typeof this.projectsToExclude === 'string') {
+      regexOfExcludedProjects = new RegExp(`^(${this.projectsToExclude})$`);
+      projectsToReport = config.projects.filter((p) => !regexOfExcludedProjects.test(p.name));
+    // If the projectsToExclude is not defined, we will report all the projects
+    } else {
+      projectsToReport = config.projects;
+    }
+
+    projectsToReport.forEach((p, index) => {
       this.execInfo.browserName += index > 0 ? ', ' : '';
       this.execInfo.browserName += p.name.charAt(0).toUpperCase() + p.name.slice(1);
+      // Set the first browser as the tested browser
+      if (index === 0) {
+        this.execInfo.testedBrowser = p.name;
+      }
     });
     if (this.options.dryRun) {
       console.log(`${bold(yellow('⏺  '))}${bold(blue(`Starting a Dry Run with ${suite.allTests().length} tests`))}`);
@@ -68,9 +95,16 @@ class XrayReporter implements Reporter {
     }
 
     console.log(`${bold(blue(' '))}`);
+    if (this.execInfo.testedBrowser !== undefined) {
+      console.log(
+        `${bold(yellow('⏺  '))}${bold(blue(`The following test execution will be imported & reported:  ${this.execInfo.testedBrowser}`))}`,
+      );
+    }
   }
 
   async onTestBegin(test: TestCase) {
+    // Not sure if this is the best way to get the project name
+    // But let's keep it for now.
     if (this.execInfo.testedBrowser === undefined) {
       this.execInfo.testedBrowser = test.parent.parent?.title;
       console.log(

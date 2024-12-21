@@ -31,4 +31,5 @@ export interface XrayOptions {
   summary?: string;
   dryRun?: boolean;
   runResult?: boolean;
+  projectsToExclude?: string | string[];
 }
