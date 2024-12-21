@@ -65,7 +65,7 @@ class XrayReporter implements Reporter {
     // Exclude projects from the report
     // If the projectsToExclude is an array, we will use the regex to exclude the projects
     if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== 'string' && this.projectsToExclude.length > 1) {
-      regexOfExcludedProjects = new RegExp(`^(${this.projectsToExclude.join(' | ')})$`);
+      regexOfExcludedProjects = new RegExp(`^(${this.projectsToExclude.join('|')})$`);
       projectsToReport = config.projects.filter((p) => !regexOfExcludedProjects.test(p.name));
     // If the projectsToExclude is a string, we will use the regex to exclude the projects
     } else if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== 'string') {
