@@ -1,6 +1,6 @@
-import type { TestResult } from "@playwright/test/reporter";
 import assert from "node:assert";
 import { describe, it } from "node:test";
+import type { TestResult } from "@playwright/test/reporter";
 import { convertToXrayJson } from "./convert";
 
 describe(convertToXrayJson.name, async () => {
