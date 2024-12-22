@@ -67,15 +67,15 @@ class XrayReporter implements Reporter {
     if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== 'string' && this.projectsToExclude.length > 1) {
       regexOfExcludedProjects = new RegExp(`^(${this.projectsToExclude.join('|')})$`);
       projectsToReport = config.projects.filter((p) => !regexOfExcludedProjects.test(p.name));
-    // If the projectsToExclude is a string, we will use the regex to exclude the projects
+      // If the projectsToExclude is a string, we will use the regex to exclude the projects
     } else if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== 'string') {
       regexOfExcludedProjects = new RegExp(`^(${this.projectsToExclude.join('')})$`);
       projectsToReport = config.projects.filter((p) => !regexOfExcludedProjects.test(p.name));
-    // If the projectsToExclude is a string, we will use the regex to exclude the projects
+      // If the projectsToExclude is a string, we will use the regex to exclude the projects
     } else if (this.projectsToExclude !== undefined && typeof this.projectsToExclude === 'string') {
       regexOfExcludedProjects = new RegExp(`^(${this.projectsToExclude})$`);
       projectsToReport = config.projects.filter((p) => !regexOfExcludedProjects.test(p.name));
-    // If the projectsToExclude is not defined, we will report all the projects
+      // If the projectsToExclude is not defined, we will report all the projects
     } else {
       projectsToReport = config.projects;
     }
