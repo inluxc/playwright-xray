@@ -5,8 +5,8 @@ import { blue, bold, green, red, white, yellow } from "picocolors";
 import Help from "./help";
 import type { XrayTest as XrayTestCloud, XrayTestResult as XrayTestResultCloud } from "./types/cloud.types";
 import type { ExecInfo } from "./types/execInfo.types";
-import type { XrayOptions } from "./types/xray.types";
 import type { XrayTestResult as XrayTestResultServer, XrayTest as XrayTestServer } from "./types/server.types";
+import type { XrayOptions } from "./types/xray.types";
 
 type XrayTestResult = XrayTestResultCloud | XrayTestResultServer;
 type XrayTest = XrayTestCloud | XrayTestServer;

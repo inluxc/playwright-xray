@@ -1,6 +1,6 @@
-import type { TestResult, TestStatus } from "@playwright/test/reporter";
 import fs from "node:fs";
 import path from "node:path";
+import type { TestResult, TestStatus } from "@playwright/test/reporter";
 import Help from "./help";
 import {
   XrayCloudStatus,

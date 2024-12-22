@@ -1,7 +1,7 @@
+import type { TestStatus } from "@playwright/test/reporter";
 import dayjs from "dayjs";
 import { XrayCloudStatus } from "./types/cloud.types";
 import { XrayServerStatus } from "./types/server.types";
-import type { TestStatus } from "@playwright/test/reporter";
 
 class Help {
   public jiraType = "";
