@@ -1,9 +1,9 @@
-import type { AxiosProxyConfig } from 'axios';
+import type { AxiosProxyConfig } from "axios";
 
 export interface XrayOptions {
   jira: {
     url: string;
-    type: 'server' | 'cloud';
+    type: "server" | "cloud";
     apiVersion: string;
   };
   cloud?: {
