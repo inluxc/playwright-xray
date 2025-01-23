@@ -1,5 +1,5 @@
 import type { FullConfig, Reporter, Suite, TestCase, TestResult } from "@playwright/test/reporter";
-import { blue, bold, green, red, white, yellow } from "picocolors";
+import { blue, bold, green, red, white, yellow, magenta } from "picocolors";
 import { convertToXrayJson } from "./convert";
 import Help from "./help";
 import type { XrayTest, XrayTestResult } from "./types/cloud.types";
@@ -59,36 +59,10 @@ class XrayReporter implements Reporter {
     };
   }
 
-  onBegin(config: FullConfig, suite: Suite) {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    let projectsToReport: Record<string, any>[] = [];
-    let regexOfExcludedProjects: RegExp;
-    // Exclude projects from the report
-    // If the projectsToExclude is an array, we will use the regex to exclude the projects
-    if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== "string" && this.projectsToExclude.length > 1) {
-      regexOfExcludedProjects = new RegExp(`^(${this.projectsToExclude.join("|")})$`);
-      projectsToReport = config.projects.filter((p) => !regexOfExcludedProjects.test(p.name));
-      // If the projectsToExclude is a string, we will use the regex to exclude the projects
-    } else if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== "string") {
-      regexOfExcludedProjects = new RegExp(`^(${this.projectsToExclude.join("")})$`);
-      projectsToReport = config.projects.filter((p) => !regexOfExcludedProjects.test(p.name));
-      // If the projectsToExclude is a string, we will use the regex to exclude the projects
-    } else if (this.projectsToExclude !== undefined && typeof this.projectsToExclude === "string") {
-      regexOfExcludedProjects = new RegExp(`^(${this.projectsToExclude})$`);
-      projectsToReport = config.projects.filter((p) => !regexOfExcludedProjects.test(p.name));
-      // If the projectsToExclude is not defined, we will report all the projects
-    } else {
-      projectsToReport = config.projects;
-    }
+  async onBegin(config: FullConfig, suite: Suite) {
 
-    projectsToReport.forEach((p, index) => {
-      this.execInfo.browserName += index > 0 ? ", " : "";
-      this.execInfo.browserName += p.name.charAt(0).toUpperCase() + p.name.slice(1);
-      // Set the first browser as the tested browser
-      if (index === 0) {
-        this.execInfo.testedBrowser = p.name;
-      }
-    });
+    this.setProjectToReport(suite, config);
+
     if (this.options.dryRun) {
       console.log(`${bold(yellow("⏺  "))}${bold(blue(`Starting a Dry Run with ${suite.allTests().length} tests`))}`);
     } else {
@@ -173,6 +147,58 @@ class XrayReporter implements Reporter {
       console.log(`There are no tests with such ${this.testCaseKeyPattern} key pattern`);
     }
   }
+
+    // biome-ignore lint/complexity/noBannedTypes: <explanation>
+    private setProjectToReport(suite: Suite, config: FullConfig<{}, {}>) {
+      const projectsToReport: string[] = [];
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      const entries: Array<any> = (suite as any)._entries;
+      const cliArguments = entries.flatMap(o => o._fullProject.fullConfig.cliProjectFilter);
+      if (cliArguments !== undefined && cliArguments[0] !== undefined){
+        projectsToReport.push(cliArguments[0]);
+      }
+      // Exclude projects from the report
+      // If the projectsToExclude is an array, we will use the regex to exclude the projects
+      if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== "string" && this.projectsToExclude.length > 1) {
+        this.removeExcludedProjects(config, this.projectsToExclude.join("|"), projectsToReport);
+        // If the projectsToExclude is an array with one string, we will use the regex to exclude the projects
+      } else if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== "string") {
+        this.removeExcludedProjects(config, this.projectsToExclude.join(""), projectsToReport);
+        // If the projectsToExclude is a string, we will use the regex to exclude the projects
+      } else if (this.projectsToExclude !== undefined && typeof this.projectsToExclude === "string") {
+        this.removeExcludedProjects(config, this.projectsToExclude, projectsToReport);
+        // If the projectsToExclude is not defined, we will report all the projects
+      } else {
+        for (const proj of config.projects) {
+          projectsToReport.push(proj.name)
+        }
+      }
+  
+      projectsToReport.forEach((p, index) => {
+        this.execInfo.browserName += index > 0 ? ", " : "";
+        this.execInfo.browserName += p.charAt(0).toUpperCase() + p.slice(1);
+        // Set the first browser as the tested browser
+        if (index === 0) {
+          this.execInfo.testedBrowser = p;
+        }
+      });
+    }
+  
+    // biome-ignore lint/complexity/noBannedTypes: <explanation>
+    private removeExcludedProjects(config: FullConfig<{}, {}>, regExp: string, projectsToReport: string[]) {
+      const excludedProjects = new RegExp(`^(${regExp})$`);
+      const pr = config.projects.filter((p) => {
+        !excludedProjects.test(p.name)
+        if(p.name === projectsToReport[0]){
+          console.log(`${bold(yellow("⏺  "))}${bold(magenta(`Setting for projectsToExclude conflicts with CLI argument. Will go with CLI: ${p.name}`))}`);
+        }
+        
+        
+      });
+      for (const proj of pr) {
+        projectsToReport.push(proj.name);
+      }
+    }
 }
 
 export default XrayReporter;
