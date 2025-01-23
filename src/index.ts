@@ -1,5 +1,5 @@
 import type { FullConfig, Reporter, Suite, TestCase, TestResult } from "@playwright/test/reporter";
-import { blue, bold, green, red, white, yellow, magenta } from "picocolors";
+import { blue, bold, green, magenta, red, white, yellow } from "picocolors";
 import { convertToXrayJson } from "./convert";
 import Help from "./help";
 import type { XrayTest, XrayTestResult } from "./types/cloud.types";
@@ -60,7 +60,6 @@ class XrayReporter implements Reporter {
   }
 
   async onBegin(config: FullConfig, suite: Suite) {
-
     this.setProjectToReport(suite, config);
 
     if (this.options.dryRun) {
@@ -192,8 +191,6 @@ class XrayReporter implements Reporter {
         if(p.name === projectsToReport[0]){
           console.log(`${bold(yellow("⏺  "))}${bold(magenta(`Setting for projectsToExclude conflicts with CLI argument. Will go with CLI: ${p.name}`))}`);
         }
-        
-        
       });
       for (const proj of pr) {
         projectsToReport.push(proj.name);

@@ -20,8 +20,6 @@ const config: PlaywrightTestConfig = {
         },
         projectKey: "CODE",
         testPlan: "CODE-1820",
-        dryRun:true,
-        projectsToExclude:['Chrome']
       },
     ],
   ],
@@ -31,21 +29,12 @@ const config: PlaywrightTestConfig = {
   },
   projects: [
     {
-      name: 'Nisse'
-    },
-    {
       name: "Chrome",
       use: {
         browserName: "chromium",
         channel: "chrome",
       },
     },
-    {
-      name: "firefox",
-      use: {  browserName: "firefox",
-        channel: "firefox" },
-        dependencies: ['Nisse']
-    }
   ],
 };
 export default config;
