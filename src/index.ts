@@ -152,7 +152,7 @@ class XrayReporter implements Reporter {
     const projectsToReport: string[] = [];
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     const entries: Array<any> = (suite as any)._entries;
-    const cliArguments = entries.flatMap(o => o._fullProject.fullConfig.cliProjectFilter);
+    const cliArguments = entries.flatMap((o) => o._fullProject.fullConfig.cliProjectFilter);
     if (cliArguments !== undefined && cliArguments[0] !== undefined) {
       projectsToReport.push(cliArguments[0]);
     }
@@ -169,7 +169,7 @@ class XrayReporter implements Reporter {
       // If the projectsToExclude is not defined, we will report all the projects
     } else {
       for (const proj of config.projects) {
-        projectsToReport.push(proj.name)
+        projectsToReport.push(proj.name);
       }
     }
 
@@ -187,9 +187,11 @@ class XrayReporter implements Reporter {
   private removeExcludedProjects(config: FullConfig<{}, {}>, regExp: string, projectsToReport: string[]) {
     const excludedProjects = new RegExp(`^(${regExp})$`);
     const pr = config.projects.filter((p) => {
-      !excludedProjects.test(p.name)
+      !excludedProjects.test(p.name);
       if (p.name === projectsToReport[0]) {
-        console.log(`${bold(yellow("⏺  "))}${bold(magenta(`Setting for projectsToExclude conflicts with CLI argument. Will go with CLI: ${p.name}`))}`);
+        console.log(
+          `${bold(yellow("⏺  "))}${bold(magenta(`Setting for projectsToExclude conflicts with CLI argument. Will go with CLI: ${p.name}`))}`
+        );
       }
     });
     for (const proj of pr) {
