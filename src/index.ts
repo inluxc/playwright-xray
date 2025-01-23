@@ -190,7 +190,7 @@ class XrayReporter implements Reporter {
       !excludedProjects.test(p.name);
       if (p.name === projectsToReport[0]) {
         console.log(
-          `${bold(yellow("⏺  "))}${bold(magenta(`Setting for projectsToExclude conflicts with CLI argument. Will go with CLI: ${p.name}`))}`
+          `${bold(yellow("⏺  "))}${bold(magenta(`Setting for projectsToExclude conflicts with CLI argument. Will go with CLI: ${p.name}`))}`,
         );
       }
     });
