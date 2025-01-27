@@ -65,7 +65,7 @@ class XrayReporter implements Reporter {
     } catch (error) {
       throw new Error(`Failed to obtain project with error: ${error}`);
     }
-    
+
     if (this.options.dryRun) {
       console.log(`${bold(yellow("⏺  "))}${bold(blue(`Starting a Dry Run with ${suite.allTests().length} tests`))}`);
     } else {
@@ -156,7 +156,6 @@ class XrayReporter implements Reporter {
     const projectsToReport: string[] = [];
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     const entries: Array<any> = (suite as any)._entries;
-    
     const cliArguments = entries.flatMap((o) => o._fullProject.fullConfig.cliProjectFilter);
     if (cliArguments !== undefined && cliArguments[0] !== undefined) {
       projectsToReport.push(cliArguments[0]);
