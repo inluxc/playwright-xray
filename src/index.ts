@@ -155,7 +155,8 @@ class XrayReporter implements Reporter {
   // biome-ignore lint/complexity/noBannedTypes: <explanation>
   private setProjectToReport(suite: Suite, config: FullConfig<{}, {}>) {
     const projectsToReport: string[] = [];
-    (suite as any)['_entries']= undefined
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    (suite as any)._entries= undefined
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     const entries: Array<any> = (suite as any)._entries;
     
