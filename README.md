@@ -93,6 +93,7 @@ test('J79 | basic test', async ({ page }) => {
 Is it possible to add some optional values to the Test Execution ticket.
 
 `projectsToExclude` - The Playwright projects that should not be reported to XRAY. Default is `undefined`. Othervise set it to array of values or to a single value, that is equal the name field of project in `playwright.config.ts`. E.g. [`setup`, `cleanup`] or `setup`.
+RegExp can also be used e.g. `projectsToExclude = 'setup.*'`. If e.g. `projectsToExclude = 'firefox'` that conflicts with the command line argument e.g.`--project='firefox'` is used, then the `projectsToExclude` will be ignored.
 
 ```typescript
 // playwright.config.ts
