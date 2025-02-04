@@ -1,5 +1,19 @@
 import type { AxiosProxyConfig } from 'axios';
 
+type ServerWithToken = {
+  token: string;
+  username?: never;
+  password?: never;
+};
+
+type ServerWithBasicAuth = {
+  token?: never;
+  username: string;
+  password: string;
+};
+
+type Server = ServerWithToken | ServerWithBasicAuth;
+
 export interface XrayOptions {
   jira: {
     url: string;
@@ -11,9 +25,7 @@ export interface XrayOptions {
     client_secret?: string;
     xrayUrl?: string;
   };
-  server?: {
-    token: string;
-  };
+  server?: Server;
   projectKey: string;
   testPlan: string;
   testExecution?: string;
