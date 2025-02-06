@@ -267,15 +267,26 @@ export class XrayService {
         // Set Xray Server URL
         if (!options.jira?.url) throw new Error('"host" option is missed. Please, provide it in the config');
         xray = options.jira?.url;
-
+        
         // Set Xray Credencials
-        if (!options.server?.token) throw new Error('"server.token" option is missing. Please provide them in the config');
-        token = options.server?.token;
+        if(options.server) {
+          if('token' in options.server) {
+            token = options.server.token as string;
+          } else if('username' in options.server && 'password' in options.server) {
+            username = options.server.username as string;
+            password = options.server.password as string;
+          } else {
+            throw new Error(
+              '"server.token" or "server.username & server.password" options are missing. Please provide either token or username and password in the config',
+            );
+          }
+        }
 
         // Set Request URL
         this.requestUrl = xray + (this.apiVersion !== '1.0' ? `rest/raven/${this.apiVersion}/api` : 'rest/raven/1.0');
 
         //Create Axios Instance with Auth
+        if (token) {
         this.axios = axios.create({
           baseURL: xray,
           headers: {
@@ -283,6 +294,19 @@ export class XrayService {
             Authorization: `Bearer ${token}`,
           },
         });
+      }
+      if (username && password) {
+        this.axios = axios.create({
+          baseURL: xray,
+          auth: {
+            username,
+            password,
+          },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      }
 
         break;
     }

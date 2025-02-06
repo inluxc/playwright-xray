@@ -1,5 +1,6 @@
 // playwright.config.ts
 import type { PlaywrightTestConfig } from "@playwright/test";
+import { userInfo } from "os";
 
 const config: PlaywrightTestConfig = {
   reporter: [
@@ -17,6 +18,8 @@ const config: PlaywrightTestConfig = {
         },
         server: {
           token: "",
+          username: "",
+          password: "",
         },
         projectKey: "CODE",
         testPlan: "CODE-1820",
