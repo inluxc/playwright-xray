@@ -1,27 +1,27 @@
-import dayjs from 'dayjs';
-import { XrayCloudStatus } from './types/cloud.types';
-import { XrayServerStatus } from './types/server.types';
-import type { TestStatus } from '@playwright/test/reporter';
+import type { TestStatus } from "@playwright/test/reporter";
+import dayjs from "dayjs";
+import { XrayCloudStatus } from "./types/cloud.types";
+import { XrayServerStatus } from "./types/server.types";
 
 class Help {
-  public jiraType = '';
+  public jiraType = "";
   constructor(jiraType: string) {
     this.jiraType = jiraType;
   }
 
   convertPwStatusToXray(status: TestStatus): string {
     switch (this.jiraType) {
-      case 'cloud':
+      case "cloud":
         return XrayCloudStatus[status];
-      case 'server':
+      case "server":
         return XrayServerStatus[status];
       default:
-        return '';
+        return "";
     }
   }
 
   getFormatData(date: Date) {
-    if (this.jiraType === 'cloud') {
+    if (this.jiraType === "cloud") {
       return date.toISOString();
     }
     const d = dayjs(date);
@@ -37,11 +37,11 @@ class Help {
     minutes = minutes % 60;
     hours = hours % 24;
 
-    let out = '';
+    let out = "";
 
-    out += hours.toString() !== '0' ? `${hours.toString()}h ` : '';
-    out += minutes.toString() !== '0' ? `${minutes.toString()}m ` : '';
-    out += seconds.toString() !== '0' ? `${seconds.toString()}s ` : '';
+    out += hours.toString() !== "0" ? `${hours.toString()}h ` : "";
+    out += minutes.toString() !== "0" ? `${minutes.toString()}m ` : "";
+    out += seconds.toString() !== "0" ? `${seconds.toString()}s ` : "";
 
     return out;
   }
