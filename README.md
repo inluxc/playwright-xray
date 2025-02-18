@@ -141,6 +141,53 @@ const config: PlaywrightTestConfig = {
   ],
 };
 ```
+## Authentication to Jira XRAY server
+Supports either token base auth or basic auth using username and password. 
+The token is the preferred method.
+
+If server option is used, then either token or username and password must be provided.
+But not both token and username plus password combination at the same time.
+
+## Using token based authentication
+
+```typescript
+// playwright.config.ts
+import { PlaywrightTestConfig } from '@playwright/test';
+
+const config: PlaywrightTestConfig = {
+  reporter: [
+    [
+      'playwright-xray',
+      {
+        server: {
+          token: '',
+        },
+      },
+    ],
+  ],
+};
+```
+
+## Using basic authentication
+
+```typescript
+// playwright.config.ts
+import { PlaywrightTestConfig } from '@playwright/test';
+
+const config: PlaywrightTestConfig = {
+  reporter: [
+    [
+      'playwright-xray',
+      {
+        server: {
+          username: '',
+          password: '',
+        },
+      },
+    ],
+  ],
+};
+```
 
 ### Proxy
 
