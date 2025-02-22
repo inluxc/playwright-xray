@@ -80,14 +80,10 @@ class XrayReporter implements Reporter {
     }
   }
 
-  async onTestBegin(test: TestCase) {
-    // Not sure if this is the best way to get the project name
-    // But let's keep it for now.
+  async onTestBegin(_test: TestCase) {
     if (this.execInfo.testedBrowser === undefined) {
-      this.execInfo.testedBrowser = test.parent.parent?.title;
-      console.log(
-        `${bold(yellow("⏺  "))}${bold(blue(`The following test execution will be imported & reported:  ${this.execInfo.testedBrowser}`))}`,
-      );
+      console.log(`${bold(yellow("⏺  "))}${bold(red("No projects to run, have you excluded all in your playwright config?"))}`);
+      return;
     }
   }
   async onTestEnd(testCase: TestCase, result: TestResult) {
