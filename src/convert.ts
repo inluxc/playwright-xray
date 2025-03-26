@@ -15,6 +15,7 @@ import {
   type XrayTest as XrayTestServer,
   type XrayTestStep as XrayTestStepServer,
 } from './types/server.types';
+import { JiraXrayStatusMapping } from './types/xray.types';
 
 type XrayTest = XrayTestServer | XrayTestCloud;
 type XrayTestIteration = XrayTestIterationServer | XrayTestIterationCloud;
@@ -47,6 +48,7 @@ type ConversionOptions = {
   uploadScreenshot?: boolean;
   uploadTrace?: boolean;
   uploadVideo?: boolean;
+  jiraXrayStatusMapping?: Partial<JiraXrayStatusMapping>;
 };
 
 async function getTest(issueKey: string, results: TestResult[], options: ConversionOptions): Promise<XrayTest> {
@@ -108,7 +110,26 @@ function getTestStatus(iterations: TestResult[], options: ConversionOptions) {
 }
 
 function getIterationStatus(status: TestStatus, options: ConversionOptions) {
-  return options.jiraType === 'server' ? XrayServerStatus[status] : XrayCloudStatus[status];
+  const { jiraXrayStatusMapping, jiraType } = options;
+
+  // Use the provided 'jiraXrayStatusMapping', or select the appropriate status mapping
+  // based on whether the jiraType is 'server' or 'cloud'
+  const mapping = jiraXrayStatusMapping ?? (jiraType === 'server' ? XrayServerStatus : XrayCloudStatus);
+
+  // If a mapping exists and the status is found in the mapping, return the corresponding value
+  if (mapping && status in mapping) {
+    return mapping[status as keyof typeof mapping];
+  }
+
+  // If jiraType is 'server' and the status is found in XrayServerStatus, return the value from XrayServerStatus
+  if (jiraType === 'server' && status in XrayServerStatus) {
+    return XrayServerStatus[status as keyof typeof XrayServerStatus];
+    // If jiraType is 'cloud' and the status is found in XrayCloudStatus, return the value from XrayCloudStatus
+  } else if (jiraType === 'cloud' && status in XrayCloudStatus) {
+    return XrayCloudStatus[status as keyof typeof XrayCloudStatus];
+  }
+
+  throw new Error(`Status "${status}" not found for jiraType "${jiraType}".`);
 }
 
 function getComment(result: TestResult) {
