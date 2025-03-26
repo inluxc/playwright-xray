@@ -138,6 +138,7 @@ class XrayReporter implements Reporter {
       uploadTrace: this.uploadTrace,
       uploadVideo: this.uploadVideo,
       jiraType: this.options.jira.type,
+      jiraXrayStatusMapping: this.options.jiraXrayStatusMapping,
     });
 
     if (typeof this.testResults !== 'undefined' && typeof this.testResults.tests !== 'undefined' && this.testResults.tests.length > 0) {
