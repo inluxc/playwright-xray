@@ -136,11 +136,68 @@ const config: PlaywrightTestConfig = {
         dryRun: false,
         runResult: true,
         projectsToExclude: ['setup', 'cleanup'],
+        jiraXrayStatusMapping: {
+          passed: "PASS",
+          failed: "FAIL",
+          skipped: "SKIPPED",
+          timedOut: "FAIL",
+          interrupted: "ABORTED",
+        }
       },
     ],
   ],
 };
 ```
+## Explain jiraXrayStatusMapping
+
+The `jiraXrayStatusMapping` configuration is **optional** and allows you to map Playwright test execution statuses to corresponding status values in **XRAY (Jira Test Management)**.
+
+### Functionality
+Playwright assigns specific statuses to test results, which may not directly align with the statuses used in XRAY. The `jiraXrayStatusMapping` option enables you to define how each Playwright status should be translated into an XRAY status.
+
+If this option is not specified, XRAY will use its default status mapping.
+
+### Example Configuration
+The following example demonstrates how to map Playwright statuses to XRAY statuses:
+
+```typescript
+const config: PlaywrightTestConfig = {
+  reporter: [
+    [
+      'playwright-xray',
+      {
+        jiraXrayStatusMapping: {
+          passed: "PASS",
+          failed: "FAIL",
+          skipped: "SKIPPED",
+          timedOut: "FAIL",
+          interrupted: "ABORTED",
+        }
+      },
+    ],
+  ],
+};
+```
+
+You can also customize the mapping for specific statuses as needed. For example, if you want to override only the skipped status:
+
+```typescript
+const config: PlaywrightTestConfig = {
+  reporter: [
+    [
+      'playwright-xray',
+      {
+        jiraXrayStatusMapping: {
+          skipped: "SOMETHING ELSE",
+        }
+      },
+    ],
+  ],
+};
+```
+This configuration leaves all other statuses unchanged, relying on XRAY's default mappings.
+
+
 ## Authentication to Jira XRAY server
 Supports either token base auth or basic auth using username and password. 
 The token is the preferred method.
