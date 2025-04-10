@@ -14,6 +14,14 @@ type ServerWithBasicAuth = {
 
 type Server = ServerWithToken | ServerWithBasicAuth;
 
+export type JiraXrayStatusMapping = {
+  passed: string;
+  failed: string;
+  skipped: string;
+  timedOut: string;
+  interrupted: string;
+};
+
 export interface XrayOptions {
   jira: {
     url: string;
@@ -44,4 +52,5 @@ export interface XrayOptions {
   dryRun?: boolean;
   runResult?: boolean;
   projectsToExclude?: string | string[];
+  jiraXrayStatusMapping?: Partial<JiraXrayStatusMapping>;
 }
