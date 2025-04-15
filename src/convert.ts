@@ -125,7 +125,8 @@ function getIterationStatus(status: TestStatus, options: ConversionOptions) {
   if (jiraType === "server" && status in XrayServerStatus) {
     return XrayServerStatus[status as keyof typeof XrayServerStatus];
     // If jiraType is 'cloud' and the status is found in XrayCloudStatus, return the value from XrayCloudStatus
-  }if (jiraType === "cloud" && status in XrayCloudStatus) {
+  }
+  if (jiraType === "cloud" && status in XrayCloudStatus) {
     return XrayCloudStatus[status as keyof typeof XrayCloudStatus];
   }
 
