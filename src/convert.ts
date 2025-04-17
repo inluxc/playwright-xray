@@ -118,7 +118,11 @@ function getIterationStatus(status: TestStatus, options: ConversionOptions) {
 
   // If a mapping exists and the status is found in the mapping, return the corresponding value
   if (mapping && status in mapping) {
-    return mapping[status as keyof typeof mapping];
+    const result = mapping[status as keyof typeof mapping];
+    if (result === undefined) {
+      throw new Error(`Status "${status}" not found for jiraType "${jiraType}".`);
+    }
+    return result;
   }
 
   // If jiraType is 'server' and the status is found in XrayServerStatus, return the value from XrayServerStatus
