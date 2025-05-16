@@ -3,17 +3,9 @@ import { inspect } from "node:util";
 import axios, { type Axios } from "axios";
 import { blue, bold, green, red, white, yellow } from "picocolors";
 import Help from "./help";
-import type {
-  XrayTest as XrayTestCloud,
-  XrayTestResult as XrayTestResultCloud,
-  XrayTestStep as XrayTestStepCloud,
-} from "./types/cloud.types";
+import type { XrayTest as XrayTestCloud, XrayTestResult as XrayTestResultCloud } from "./types/cloud.types";
 import type { ExecInfo } from "./types/execInfo.types";
-import type {
-  XrayTestResult as XrayTestResultServer,
-  XrayTest as XrayTestServer,
-  XrayTestStep as XrayTestStepServer,
-} from "./types/server.types";
+import type { XrayTestResult as XrayTestResultServer, XrayTest as XrayTestServer } from "./types/server.types";
 import type { XrayOptions } from "./types/xray.types";
 
 type XrayTestResult = XrayTestResultCloud | XrayTestResultServer;
@@ -112,7 +104,7 @@ export class XrayService {
         fs.writeFileSync("xray-payload.json", JSON.stringify(results));
       }
 
-      const key = await this.postResultToJira(URL, results);
+      const key = !this.dryRun ? await this.postResultToJira(URL, results) : "Dry run";
 
       const action = this.options.testExecution !== undefined ? "updated" : "created";
 
@@ -357,11 +349,13 @@ export class XrayService {
     if (results.tests === undefined) return;
     if (byteSize(JSON.stringify(results)) < this.limitEvidenceSize) return;
     for (let i: number = results.tests.length - 1; i > 0; i--) {
-      console.log(`${bold(yellow(`⚠️  Trimming down evidence from:  ${results.tests[i].testKey}`))}`);
-      if (this.options.server) (results.tests[i] as XrayTestStepServer).evidences = [];
-      else (results.tests[i] as XrayTestStepCloud).evidences = [];
-      if (byteSize(JSON.stringify(results)) < this.limitEvidenceSize) return;
+      if (results.tests[i].status.includes("PASS")) continue;
+      console.log(`${bold(yellow(`⚠️  Removing evidence from:  ${results.tests[i].testKey}`))}`);
+      if (this.options.server) (results.tests[i] as XrayTestServer).evidences = [];
+      else (results.tests[i] as XrayTestCloud).evidence = [];
+      if (byteSize(JSON.stringify(results)) < this.limitEvidenceSize) break;
     }
+    if (this.options.debug) fs.writeFileSync("xray-payload-trim.json", JSON.stringify(results));
   }
 }
 const byteSize = (str: BlobPart) => new Blob([str]).size;
