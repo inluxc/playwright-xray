@@ -487,6 +487,9 @@ and `client_secret` are ignored, and the reporter will produce a `xray-payload.j
 
 The option `runResult` will generate a `runresult.json` file containing a summary of the execution if is set to true (the default is false)
 
+The option `limitEvidenceSize` will remove evidences starting with tha last failed test case if the upload request exceeds the specified value.
+If the option is omitted, the upload will be limited to 100 MiB. If option debug is enabled, a `xray-payload-trim.json` file will be created.
+
 ```ts
 [
       'playwright-xray',
@@ -508,7 +511,8 @@ The option `runResult` will generate a `runresult.json` file containing a summar
         stepCategories: ['test.step'],
         summary: `[${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}] - Automated`,
         dryRun: true,
-        runResult: true
+        runResult: true,
+        limitEvidenceSize: 100000000
       },
     ],
 ```
