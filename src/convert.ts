@@ -4,23 +4,27 @@ import type { TestResult, TestStatus } from '@playwright/test/reporter';
 import Help from './help';
 import {
   XrayCloudStatus,
+  XrayIterationParameter as XrayIterationParameterCloud,
   type XrayTest as XrayTestCloud,
   type XrayTestEvidence as XrayTestEvidenceCloud,
   type XrayTestIteration as XrayTestIterationCloud,
 } from './types/cloud.types';
 import {
   XrayServerStatus,
+  XrayIterationParameter as XrayIterationParameterServer,
   type XrayTestEvidence as XrayTestEvidenceServer,
   type XrayTestIteration as XrayTestIterationServer,
   type XrayTest as XrayTestServer,
   type XrayTestStep as XrayTestStepServer,
 } from './types/server.types';
 import type { JiraXrayStatusMapping } from './types/xray.types';
+import { getXrayMetadata } from './metadata';
 
 type XrayTest = XrayTestServer | XrayTestCloud;
 type XrayTestIteration = XrayTestIterationServer | XrayTestIterationCloud;
 type XrayTestStep = XrayTestStepServer | XrayTestCloud;
 type XrayTestEvidence = XrayTestEvidenceServer | XrayTestEvidenceCloud;
+type XrayIterationParameter = XrayIterationParameterServer | XrayIterationParameterCloud;
 
 /**
  * Converts a map of issue keys and Playwright test results to Xray JSON. If there are multiple tests grouped under a single issue key, a
@@ -73,10 +77,13 @@ async function getTest(issueKey: string, results: TestResult[], options: Convers
     const iterations: XrayTestIteration[] = [];
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
+      const metadata = getXrayMetadata(result);
+      const iterationParameters: XrayIterationParameter[] = Object.entries(metadata?.parameters ?? {}).map(([key, value]) => {
+        return { name: key, value: value };
+      });
       iterations.push({
         status: getIterationStatus(result.status, options),
-        // TODO: Add way to access user-defined parameters here.
-        parameters: [{ name: 'iteration', value: (iterations.length + 1).toString() }],
+        parameters: [{ name: 'iteration', value: (iterations.length + 1).toString() }, ...iterationParameters],
         steps: getSteps(result, options),
       });
     }

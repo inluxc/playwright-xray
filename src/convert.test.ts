@@ -152,6 +152,88 @@ describe(convertToXrayJson.name, async () => {
     );
   });
 
+  await it('single data-driven test with iteration parameters', async () => {
+    const map = new Map<string, TestResult[]>();
+    map.set('ABC-123', [
+      {
+        status: 'passed',
+        attachments: [
+          {
+            name: 'xray-metadata',
+            contentType: 'application/json',
+            body: Buffer.from('{"parameters":{"user":"alice","mail":"alice@example.net"}}'),
+          },
+        ],
+        duration: 1000,
+        errors: [],
+        parallelIndex: 0,
+        retry: 0,
+        startTime: new Date(0),
+        stderr: [],
+        stdout: [],
+        steps: [],
+        workerIndex: 0,
+      },
+      {
+        status: 'passed',
+        attachments: [
+          {
+            name: 'xray-metadata',
+            contentType: 'application/json',
+            body: Buffer.from('{"parameters":{"user":"bob","mail":"bob@example.net","abc":"xyz"}}'),
+          },
+        ],
+        duration: 1000,
+        parallelIndex: 0,
+        retry: 0,
+        startTime: new Date(0),
+        stderr: [],
+        stdout: [],
+        steps: [],
+        errors: [],
+        workerIndex: 0,
+      },
+    ]);
+    assert.deepStrictEqual(
+      await convertToXrayJson(map, {
+        jiraType: 'server',
+        receivedRegEx: /Received string: "(.*?)"(?=\n)/,
+        stepCategories: ['expect', 'pw:api', 'test.step'],
+      }),
+      [
+        {
+          testKey: 'ABC-123',
+          status: 'PASS',
+          start: '1970-01-01T01:00:00+01:00',
+          finish: '1970-01-01T01:00:01+01:00',
+          iterations: [
+            {
+              parameters: [
+                { name: 'iteration', value: '1' },
+                { name: 'user', value: 'alice' },
+                { name: 'mail', value: 'alice@example.net' },
+              ],
+              status: 'PASS',
+              steps: [],
+            },
+            {
+              parameters: [
+                { name: 'iteration', value: '2' },
+                { name: 'user', value: 'bob' },
+                { name: 'mail', value: 'bob@example.net' },
+                { name: 'abc', value: 'xyz' },
+              ],
+              status: 'PASS',
+              steps: [],
+            },
+          ],
+          evidences: [],
+          comment: '',
+        },
+      ],
+    );
+  });
+
   await it('single data-driven test with attachment', async () => {
     const map = new Map<string, TestResult[]>();
     map.set('ABC-123', [

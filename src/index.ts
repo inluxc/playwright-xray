@@ -202,4 +202,6 @@ class XrayReporter implements Reporter {
 }
 
 export default XrayReporter;
+export type { XrayTestMetadata } from './metadata';
+export { setXrayMetadata } from './metadata';
 export * from './types/xray.types';

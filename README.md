@@ -412,6 +412,22 @@ for (const url of ['https://example.org', 'https://playwright.dev']) {
 
 ![xray iteration results](./assets/xray-iterations.png)
 
+To specify actual iteration parameters, the utility function for defining Xray metadata can be used:
+
+```typescript
+import { setXrayMetadata } from 'playwright-xray';
+
+for (const name of ['Jane', 'John', 'Mary']) {
+  test(`XYZ-123 | log in as ${name}`, async ({ page }, testInfo) => {
+    await setXrayMetadata(testInfo, { parameters: { user: name } })
+    await page.goto(url);
+    // ...
+  });
+}
+```
+
+![xray iteration results with parameters](./assets/xray-iterations-parameters.png)
+
 When uploading, evidence for individual test runs is added to the test execution itself, as Xray does not support adding evidence to iterations outside of steps.
 
 The reporter calculates Xray statuses for tests with iterations as follows:
@@ -419,10 +435,6 @@ The reporter calculates Xray statuses for tests with iterations as follows:
 - tests with iterations are considered passed if at least one iteration passed
 - tests with iterations are considered failed if all iterations failed or timed out
 - if there is at least one passed iteration, one failed iteration _and_ the the flaky flag is defined, the test will be reported as flaky
-
-> [!NOTE]
-> Please note that there is currently no detailed parameter mapping for the created iterations.
-> Instead of any actual parameters that might be defined in the test cases, each Xray iteration will have a single parameter called `iteration` with its value set to the iteration index (starting at 1).
 
 ## Expose reporter options type
 In order to enable IntelliSense to provide useful suggestions and avoid potential typos not being detected,
