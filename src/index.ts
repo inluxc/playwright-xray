@@ -111,7 +111,8 @@ class XrayReporter implements Reporter {
       switch (this.help.convertPwStatusToXray(result.status)) {
         case "PASS":
         case "PASSED":
-          console.log(`${bold(green(`✅ ${projectID}${testCase.title}`))}`);
+          if (result.retry > 0) console.log(`${bold(yellow(`⚠️  ${projectID}${testCase.title}`))}`);
+          else console.log(`${bold(green(`✅ ${projectID}${testCase.title}`))}`);
           break;
         case "FAIL":
         case "FAILED":

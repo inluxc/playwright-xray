@@ -536,11 +536,11 @@ If the option is omitted, the upload will be limited to 100 MiB. If option debug
 
 playwright-xray is [MIT licensed](./LICENSE).
 
-## Contributors (special thanks for supporting the project)
-
+## Contributors (special thanks for supporting the project), in alphabetical order:
+- [Basti](https://github.com/csvtuda)
+- [coolswood](https://github.com/coolswood)
 - [Niklas-Back](https://github.com/Niklas-Back)
 - [rodrigoodhin](https://github.com/rodrigoodhin)
-- [coolswood](https://github.com/coolswood)
 - [roman-gyver](https://github.com/roman-gyver)
 
 ## Author
