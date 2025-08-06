@@ -19,10 +19,10 @@ test("TES-49 | flaky test with playwright steps", async ({ page }) => {
   });
 });
 
-test("TES-42 | test with - skip", async ({ page }) => {
+test("TES-42 | test with - skip", async () => {
   test.skip();
 });
 
-test("Test without XRAY key - skip", async ({ page }) => {
+test("Test without XRAY key - skip", async () => {
   test.skip();
 });

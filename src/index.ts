@@ -148,10 +148,10 @@ class XrayReporter implements Reporter {
     }
   }
 
-  // biome-ignore lint/complexity/noBannedTypes: <explanation>
+  // biome-ignore lint/complexity/noBannedTypes: Allow {]
   private setProjectToReport(suite: Suite, config: FullConfig<{}, {}>) {
     const projectsToReport: string[] = [];
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: Accept any
     const entries: Array<any> = (suite as any)._entries;
     const cliArguments = entries.flatMap((o) => o._fullProject.fullConfig.cliProjectFilter);
     if (cliArguments !== undefined && cliArguments[0] !== undefined) {
@@ -188,7 +188,7 @@ class XrayReporter implements Reporter {
     });
   }
 
-  // biome-ignore lint/complexity/noBannedTypes: <explanation>
+  // biome-ignore lint/complexity/noBannedTypes: Allow {}
   private removeExcludedProjects(config: FullConfig<{}, {}>, regExp: string, projectsToReport: string[]) {
     const excludedProjects = new RegExp(`^(${regExp})$`);
     const pr = config.projects.filter((p) => {
