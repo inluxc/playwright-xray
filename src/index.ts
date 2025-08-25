@@ -194,7 +194,7 @@ class XrayReporter implements Reporter {
     const excludedProjects = new RegExp(`^(${regExp})$`);
     const pr = config.projects.filter((p) => {
       if (!excludedProjects.test(p.name)) return p;
-      return;
+      return [];
     });
     for (const proj of pr) {
       projectsToReport.push(proj.name);
