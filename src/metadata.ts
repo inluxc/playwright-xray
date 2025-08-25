@@ -1,10 +1,10 @@
-import type { TestInfo } from "@playwright/test";
-import type { TestResult } from "@playwright/test/reporter";
+import type { TestInfo } from '@playwright/test';
+import type { TestResult } from '@playwright/test/reporter';
 
 /**
  * The key where Xray related data will be stored in the test attachments.
  */
-const ATTACHMENT_KEY = "xray-metadata";
+const ATTACHMENT_KEY = 'xray-metadata';
 
 /**
  * Models Xray-specific metadata that is relevant for this test.
@@ -41,7 +41,7 @@ export interface XrayTestMetadata {
 export async function setXrayMetadata(testInfo: TestInfo, metadata: XrayTestMetadata): Promise<void> {
   await testInfo.attach(ATTACHMENT_KEY, {
     body: JSON.stringify(metadata, null, 2),
-    contentType: "application/json",
+    contentType: 'application/json',
   });
 }
 
@@ -56,5 +56,5 @@ export function getXrayMetadata(testResult: TestResult): XrayTestMetadata | unde
   if (!existingAttachment || !existingAttachment.body) {
     return;
   }
-  return JSON.parse(existingAttachment.body.toString("utf-8"));
+  return JSON.parse(existingAttachment.body.toString('utf-8'));
 }
