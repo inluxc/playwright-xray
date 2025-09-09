@@ -481,6 +481,11 @@ const config: PlaywrightTestConfig = {
   If this option is not set, the test will be tagged as PASSED. Please note that you have to define the
   Execution Status you choose in Xray, e.g. FLAKY.
 
+- During the test run the reporter vill flag each test after execution as Passed, Failed, Flaky or skipped with the following symbols ✅, ⛔, ⚠️ and 🚫.
+  There is though a caveat. If the tests are run in serial mode (test.describe.configure({ mode: 'serial' });) and the last test fails,
+  then all tests fail even if e.g. the first test in the suite passed. This means that when the last test passes in a rerun, the first test will falsely be
+  flagged as flaky (see https://playwright.dev/docs/test-retries#serial-mode) 
+
 - Stepcategories defines how playwright-xray reporter should recognize test steps. The built-in categories in Playwright are the following:
 
 * `hook` for fixtures and hooks initialization and teardown
@@ -536,11 +541,11 @@ If the option is omitted, the upload will be limited to 100 MiB. If option debug
 
 playwright-xray is [MIT licensed](./LICENSE).
 
-## Contributors (special thanks for supporting the project)
-
-- [Niklas-Back](https://github.com/Niklas-Back)
-- [rodrigoodhin](https://github.com/rodrigoodhin)
+## Contributors (special thanks for supporting the project), in alphabetical order:
+- [Basti](https://github.com/csvtuda)
 - [coolswood](https://github.com/coolswood)
+- [NiklasBack](https://github.com/NiklasBack)
+- [rodrigoodhin](https://github.com/rodrigoodhin)
 - [roman-gyver](https://github.com/roman-gyver)
 
 ## Author
