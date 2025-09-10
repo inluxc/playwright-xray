@@ -47,6 +47,7 @@ export class XrayService {
     this.axios = axios;
 
     this.axios.defaults.headers.options = {
+      'Content-Type': 'application/json',
       'Cache-Control': 'no-cache',
       Pragma: 'no-cache',
       Expires: '0',
