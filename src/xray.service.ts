@@ -22,6 +22,7 @@ export class XrayService {
   private dryRun: boolean;
   private runResult: boolean;
   private limitEvidenceSize: number;
+  private isXrayCloudAuthenticated = false;
 
   constructor(options: XrayOptions) {
     // Init vars
@@ -53,7 +54,9 @@ export class XrayService {
     };
 
     if (!this.dryRun) {
-      this.initialzeJiraConnection(options);
+      this.initialzeJiraConnection(options)
+        .then(() => console.log('Live Mode is on'))
+        .catch(console.error);
     }
     // Set Project Key
     if (!options.projectKey) throw new Error('"projectKey" option is missed. Please, provide it in the config');
@@ -223,7 +226,7 @@ export class XrayService {
     }
   }
 
-  private initialzeJiraConnection(options: XrayOptions) {
+  private async initialzeJiraConnection(options: XrayOptions) {
     let xray = '';
     let username = '';
     let password = '';
@@ -245,23 +248,23 @@ export class XrayService {
         this.requestUrl = new URL('api/v2', xray).toString();
 
         //Create Axios Instance with Auth
-        axios
-          .post(`${this.requestUrl}/authenticate`, {
+        try {
+          const request = await axios.post(`${this.requestUrl}/authenticate`, {
             client_id: username,
             client_secret: password,
-          })
-          .then((request) => {
-            this.axios = axios.create({
-              baseURL: xray,
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${request.data}`,
-              },
-            });
-          })
-          .catch((error) => {
-            throw new Error(`Failed to authenticate to host ${xray} with error: ${error}`);
           });
+
+          this.isXrayCloudAuthenticated = true;
+          this.axios = axios.create({
+            baseURL: xray,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${request.data}`,
+            },
+          });
+        } catch (error) {
+          throw new Error(`Failed to authenticate to host ${xray} with error: ${error}`);
+        }
 
         break;
 
@@ -314,6 +317,9 @@ export class XrayService {
   }
 
   private async postResultToJira(URL: string, results: XrayTestResult) {
+    if (!this.isXrayCloudAuthenticated && this.type === 'cloud') {
+      await this.initialzeJiraConnection(this.options);
+    }
     this.trimEvidence(results);
     const response = await this.axios.post(URL, JSON.stringify(results), {
       maxBodyLength: 107374182400, //100gb
