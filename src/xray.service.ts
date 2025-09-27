@@ -322,6 +322,9 @@ export class XrayService {
       await this.initialzeJiraConnection(this.options);
     }
     this.trimEvidence(results);
+    if (this.options.executedBy) {
+      this.addExecutedBy(results.tests!!);
+    }
     const response = await this.axios.post(URL, JSON.stringify(results), {
       maxBodyLength: 107374182400, //100gb
       maxContentLength: 107374182400, //100gb
@@ -364,5 +367,12 @@ export class XrayService {
     }
     if (this.options.debug) fs.writeFileSync('xray-payload-trim.json', JSON.stringify(results));
   }
+
+  private addExecutedBy(tests: XrayTest[]) {
+    for (const test of tests) {
+      test.executedBy = this.options.executedBy;
+    }
+  }
 }
+
 const byteSize = (str: BlobPart) => new Blob([str]).size;
