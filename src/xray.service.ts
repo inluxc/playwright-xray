@@ -323,7 +323,7 @@ export class XrayService {
     }
     this.trimEvidence(results);
     if (this.options.executedBy) {
-      this.addExecutedBy(results.tests!!);
+      this.addExecutedBy(results.tests ?? []);
     }
     const response = await this.axios.post(URL, JSON.stringify(results), {
       maxBodyLength: 107374182400, //100gb
