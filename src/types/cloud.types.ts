@@ -34,6 +34,7 @@ export interface XrayTest {
   actualResult?: string;
   status: string;
   evidence?: XrayTestEvidence[];
+  executedBy?: string;
   iterations?: XrayTestIteration[];
   steps?: XrayTestStep[];
   defects?: object;

@@ -25,6 +25,7 @@ const config: PlaywrightTestConfig = {
         uploadVideo: true,
         projectKey: "CODE",
         testPlan: "CODE-1820",
+        dryRun: true,
       },
     ],
   ],
@@ -34,11 +35,16 @@ const config: PlaywrightTestConfig = {
   },
   projects: [
     {
+      name: "setup",
+      testMatch: "**/*.setup.ts",
+    },
+    {
       name: "Chrome",
       use: {
         browserName: "chromium",
         channel: "chrome",
       },
+      dependencies: ["setup"],
     },
   ],
 };
