@@ -2,6 +2,9 @@
 
 Publish Playwright test run on Xray
 
+NOTICE: Playwright Xray will move to its onw organization, were @NiklasBack will be owner also.
+NPM install sshould not have any changes.
+
 This reporter is based in playwright zephyr from Yevhen Laichenkov https://github.com/elaichenkov/playwright-zephyr
 Thanks Yevhen for the great contribution
 
