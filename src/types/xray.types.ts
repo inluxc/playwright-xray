@@ -54,4 +54,5 @@ export interface XrayOptions {
   limitEvidenceSize?: number;
   projectsToExclude?: string | string[];
   jiraXrayStatusMapping?: Partial<JiraXrayStatusMapping>;
+  executedBy?: string;
 }

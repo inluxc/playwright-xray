@@ -128,6 +128,7 @@ const config: PlaywrightTestConfig = {
         testExecution: 'JIRA_CODE-YYY',
         version: 'v1.0',
         revision: '12345',
+        executedBy: 'valid:accountid',
         description: 'This test was executed automatically',
         testEnvironments: ['dev', 'test'],
         uploadScreenShot: true,
