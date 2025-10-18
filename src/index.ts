@@ -88,18 +88,24 @@ class XrayReporter implements Reporter {
   }
   async onTestEnd(testCase: TestCase, result: TestResult) {
     const testCaseId = testCase.title.match(this.testCaseKeyPattern);
-    const testCode: string = testCaseId?.[1] ?? '';
+    const testCodes: string = testCaseId?.[1] ?? '';
     const projectId = JSON.stringify(testCase.parent.project()).match(/__projectId":"(.*)"/)?.[1];
     if (this.execInfo.testedBrowser !== projectId) {
       return;
     }
 
-    if (testCode !== '') {
-      const tests = this.testsByKey.get(testCode);
-      if (!tests) {
-        this.testsByKey.set(testCode, [result]);
-      } else {
-        tests.push(result);
+    if (testCodes !== '') {
+      // Split by comma and trim whitespace to handle multiple test case IDs
+      const testCodeArray = testCodes.split(',').map(code => code.trim()).filter(code => code !== '');
+      
+      for (const testCode of testCodeArray) {
+        // Handle retries and data-driven tests for each test case ID
+        const tests = this.testsByKey.get(testCode);
+        if (!tests) {
+          this.testsByKey.set(testCode, [result]);
+        } else {
+          tests.push(result);
+        }
       }
 
       let projectID = '';
