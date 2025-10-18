@@ -99,8 +99,13 @@ class XrayReporter implements Reporter {
       const testCodeArray = testCodes.split(',').map(code => code.trim()).filter(code => code !== '');
       
       for (const testCode of testCodeArray) {
-        // Each test case ID gets its own separate entry to avoid iterations
-        this.testsByKey.set(testCode, [result]);
+        // Handle retries and data-driven tests for each test case ID
+        const tests = this.testsByKey.get(testCode);
+        if (!tests) {
+          this.testsByKey.set(testCode, [result]);
+        } else {
+          tests.push(result);
+        }
       }
 
       let projectID = '';
