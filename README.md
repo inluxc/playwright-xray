@@ -80,8 +80,10 @@ const config: PlaywrightTestConfig = {
 };
 ```
 
-Also, your playwright tests should include unique ID `J79` of your Xray test case + `|`:
+Also, your playwright tests should include unique ID `J79` of your Xray test case + `|`. The library supports both single and multiple test case IDs:
 
+
+### Single Test Case ID:
 ```typescript
 // Xray test case ID + |
 test('J79 | basic test', async ({ page }) => {
@@ -90,6 +92,17 @@ test('J79 | basic test', async ({ page }) => {
   await expect(title).toHaveText('Playwright');
 });
 ```
+
+### Multiple Test Case IDs:
+```typescript
+// Multiple Xray test case IDs + |
+test('J79,J80 | basic test', async ({ page }) => {
+  await page.goto('https://playwright.dev/');
+  const title = page.locator('.navbar__inner .navbar__title');
+  await expect(title).toHaveText('Playwright');
+});
+```
+**Note:** When using multiple test case IDs, separate them with commas  before the `|` separator.
 
 ### Optional config
 
