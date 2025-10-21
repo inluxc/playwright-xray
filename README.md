@@ -561,10 +561,11 @@ playwright-xray is [MIT licensed](./LICENSE).
 ## Contributors (special thanks for supporting the project), in alphabetical order:
 - [Basti](https://github.com/csvtuda)
 - [coolswood](https://github.com/coolswood)
+- [MonishaNikhil](https://github.com/mons-ops)
 - [NiklasBack](https://github.com/NiklasBack)
 - [rodrigoodhin](https://github.com/rodrigoodhin)
 - [roman-gyver](https://github.com/roman-gyver)
-- [MonishaNikhil](https://github.com/mons-ops)
+
 
 ## Author
 
