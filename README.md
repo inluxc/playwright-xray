@@ -564,6 +564,7 @@ playwright-xray is [MIT licensed](./LICENSE).
 - [NiklasBack](https://github.com/NiklasBack)
 - [rodrigoodhin](https://github.com/rodrigoodhin)
 - [roman-gyver](https://github.com/roman-gyver)
+- [MonishaNikhil](https://github.com/mons-ops)
 
 ## Author
 
