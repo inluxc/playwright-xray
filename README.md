@@ -80,7 +80,7 @@ const config: PlaywrightTestConfig = {
 };
 ```
 
-Also, your playwright tests should include unique ID `J79` of your Xray test case + `|`. The library supports both single and multiple test case IDs:
+Also, your playwright tests should include unique ID `J79` of your Xray test case + `|`. The library supports both single and multiple test case IDs N.B If you have different step definitions and steps in multiple test cases, the passed and failed will be related to step number. E.g. even if the action of the steps are copletley different the same steps vill be marked as passed or failed :
 
 
 ### Single Test Case ID:
