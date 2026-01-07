@@ -332,6 +332,13 @@ export class XrayService {
       proxy: this.options.proxy !== undefined ? this.options.proxy : false,
     });
     if (response.status !== 200) throw new Error(`${response.status} - Failed to create test cycle`);
+
+    if (response.data.testIssues?.error?.length !== 0) {
+      throw new Error(
+        `Partial test reporting failure for the following tests: ${response.data.testIssues.error.map((e: { testKey: string }) => e.testKey).join(", ")}`,
+      );
+    }
+
     let key = response.data.key;
     if (this.options.jira.type === "server") {
       key = response.data.testExecIssue.key;
