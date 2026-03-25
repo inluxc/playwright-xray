@@ -20,18 +20,3 @@ export async function convertToMultipart(testResult: XrayTestResult, multiPartOp
 
   return { info: JSON.stringify(info), testResult: JSON.stringify(testResult) };
 }
-
-export function verifyMultipatConfig(options: XrayOptions) {
-  if (options.multiPart === undefined) {
-    throw new Error("Multipart options must be provided when useMultipart is true");
-  }
-  if (options.multiPart.project === undefined || options.multiPart.issuetype === undefined) {
-    throw new Error("Multipart options must include project and issuetype");
-  }
-  if (options.multiPart.xrayFields === undefined) {
-    throw new Error("Multipart options must include xrayFields");
-  }
-  if (options.multiPart.multiPartUrl === undefined) {
-    throw new Error("Multipart options must include multiPartUrl");
-  }
-}

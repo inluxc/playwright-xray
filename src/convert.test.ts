@@ -3,7 +3,8 @@ import fs from "node:fs";
 import { describe, it } from "node:test";
 import type { TestResult } from "@playwright/test/reporter";
 import { convertToXrayJson } from "./convert.ts";
-import { convertToMultipart, verifyMultipatConfig } from "./convertToMultipart.ts";
+import { convertToMultipart } from "./convertToMultipart.ts";
+import { ReportUploader } from "./reportUploader.ts";
 
 describe(convertToXrayJson.name, async () => {
   await it("single test", async () => {
@@ -62,6 +63,7 @@ describe(convertToXrayJson.name, async () => {
       projectKey: "TEST",
       testPlan: "",
       debug: false,
+      useMultiPart: true,
       multiPart: {
         summary: "summary",
         multiPartUrl: "url",
@@ -71,7 +73,7 @@ describe(convertToXrayJson.name, async () => {
       },
     };
 
-    assert.throws(() => verifyMultipatConfig(testConfig), { message: "Multipart options must include xrayFields" });
+    assert.throws(() => new ReportUploader(testConfig), { message: "Multipart options must include xrayFields" });
   });
 
   await it("Multipart settings project test", async () => {
@@ -80,6 +82,7 @@ describe(convertToXrayJson.name, async () => {
       projectKey: "TEST",
       testPlan: "",
       debug: false,
+      useMultiPart: true,
       multiPart: {
         summary: "summary",
         multiPartUrl: "url",
@@ -89,7 +92,7 @@ describe(convertToXrayJson.name, async () => {
       },
     };
 
-    assert.throws(() => verifyMultipatConfig(testConfig), { message: "Multipart options must include project and issuetype" });
+    assert.throws(() => new ReportUploader(testConfig), { message: "Multipart options must include project and issuetype" });
   });
 
   await it("Multipart settings issuetype test", async () => {
@@ -98,6 +101,7 @@ describe(convertToXrayJson.name, async () => {
       projectKey: "TEST",
       testPlan: "",
       debug: false,
+      useMultiPart: true,
       multiPart: {
         summary: "summary",
         multiPartUrl: "url",
@@ -107,7 +111,7 @@ describe(convertToXrayJson.name, async () => {
       },
     };
 
-    assert.throws(() => verifyMultipatConfig(testConfig), { message: "Multipart options must include project and issuetype" });
+    assert.throws(() => new ReportUploader(testConfig), { message: "Multipart options must include project and issuetype" });
   });
 
   await it("Multipart settings url test", async () => {
@@ -116,6 +120,7 @@ describe(convertToXrayJson.name, async () => {
       projectKey: "TEST",
       testPlan: "",
       debug: false,
+      useMultiPart: true,
       multiPart: {
         summary: "summary",
         issuetype: { id: "10123055" },
@@ -125,7 +130,29 @@ describe(convertToXrayJson.name, async () => {
       },
     };
 
-    assert.throws(() => verifyMultipatConfig(testConfig), { message: "Multipart options must include multiPartUrl" });
+    assert.throws(() => new ReportUploader(testConfig), { message: "Multipart options must include multiPartUrl" });
+  });
+
+  await it("Multipart settings sever test", async () => {
+    const testConfig = {
+      jira: { url: "cloud", apiVersion: "q", type: "server" as const },
+      projectKey: "TEST",
+      testPlan: "",
+      debug: false,
+      useMultiPart: true,
+      multiPart: {
+        summary: "summary",
+        issuetype: { id: "10123055" },
+        project: { id: "123" },
+        components: [{ name: "TEST" }, { name: "TEST-2" }],
+        xrayFields: {},
+      },
+    };
+
+    assert.throws(() => new ReportUploader(testConfig), {
+      message:
+        "Multipart options only supported for Xray Cloud. Please set useMultipart to false or remove multipart options from the config",
+    });
   });
 
   await it("single test with attachment", async () => {

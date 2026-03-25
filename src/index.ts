@@ -86,6 +86,7 @@ class XrayReporter implements Reporter {
       return;
     }
   }
+
   async onTestEnd(testCase: TestCase, result: TestResult) {
     const testCaseId = testCase.title.match(this.testCaseKeyPattern);
     const testCodes: string = testCaseId?.[1] ?? "";
