@@ -40,7 +40,7 @@
     "@biomejs/biome": "2.2.4",
     "@playwright/test": "^1.30.0",
     "@types/node": "^20.11.25",
-    "release-it": "^19.0.4",
+    "release-it": "^20.0.1",
     "tsx": "^4.19.2",
     "typescript": "^4.5.4"
   },
