@@ -3,6 +3,9 @@ name: Code quality
 on:
   push:
 
+permissions:
+  contents: read
+
 jobs:
   quality:
     runs-on: ubuntu-latest
