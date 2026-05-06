@@ -12,6 +12,9 @@ on:
         required: true
         default: 'latest'
 
+permissions:
+  contents: write
+
 env:
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
