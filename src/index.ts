@@ -1,5 +1,6 @@
 import type { FullConfig, FullResult, Reporter, Suite, TestCase, TestResult } from "@playwright/test/reporter";
 import { blue, bold, green, magenta, red, white, yellow } from "picocolors";
+import { getArg } from "./args";
 import { convertToXrayJson } from "./convert";
 import Help from "./help";
 import type { XrayTest, XrayTestResult } from "./types/cloud.types";
@@ -50,12 +51,13 @@ class XrayReporter implements Reporter {
       tests: [] as XrayTest[],
     };
     this.projectsToExclude = this.options.projectsToExclude;
+    const args = getArg("project");
     console.log(`${bold(blue("-------------------------------------"))}`);
     console.log(`${bold(blue(" "))}`);
     if (this.options.summary !== undefined) this.testResults.info.summary = this.options.summary;
     this.execInfo = {
       browserName: "",
-      testedBrowser: undefined,
+      testedBrowser: typeof args === "boolean" ? undefined : args,
     };
   }
 
@@ -90,7 +92,10 @@ class XrayReporter implements Reporter {
     const testCaseId = testCase.title.match(this.testCaseKeyPattern);
     const testCodes: string = testCaseId?.[1] ?? "";
     const projectId = JSON.stringify(testCase.parent.project()).match(/__projectId":"(.*)"/)?.[1];
-    if (this.execInfo.testedBrowser !== projectId) {
+    if (this.execInfo.testedBrowser?.toLowerCase() !== projectId?.toLocaleLowerCase()) {
+      console.log(
+        `${bold(white("⏺  "))}${bold(white(`Test case ${testCase.title} does not belong to the selected project. Running in project "${projectId}"`))}`,
+      );
       return;
     }
 
@@ -162,10 +167,13 @@ class XrayReporter implements Reporter {
     const projectsToReport: string[] = [];
     // biome-ignore lint/suspicious/noExplicitAny: Allow for any
     const entries: Array<any> = (suite as any)._entries;
-    const cliArguments = entries.flatMap((o) => o._fullProject.fullConfig.cliProjectFilter);
-    if (cliArguments !== undefined && cliArguments[0] !== undefined) {
-      projectsToReport.push(cliArguments[0]);
+    const definedProjects = entries.flatMap((o) => o._fullProject.id);
+
+    if (this.execInfo.testedBrowser !== undefined) {
+      projectsToReport.push(this.execInfo.testedBrowser);
     }
+
+    console.log(definedProjects);
     // Exclude projects from the report
     // If the projectsToExclude is an array, we will use the regex to exclude the projects
     if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== "string" && this.projectsToExclude.length > 1) {
