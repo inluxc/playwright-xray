@@ -173,7 +173,6 @@ class XrayReporter implements Reporter {
       projectsToReport.push(this.execInfo.testedBrowser);
     }
 
-    console.log(definedProjects);
     // Exclude projects from the report
     // If the projectsToExclude is an array, we will use the regex to exclude the projects
     if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== "string" && this.projectsToExclude.length > 1) {
