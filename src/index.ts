@@ -63,7 +63,7 @@ class XrayReporter implements Reporter {
 
   async onBegin(config: FullConfig, suite: Suite) {
     try {
-      this.setProjectToReport(suite, config);
+      this.setProjectToReport(config);
     } catch (error) {
       throw new Error(`Failed to obtain project with error: ${error}`);
     }
@@ -163,11 +163,8 @@ class XrayReporter implements Reporter {
   }
 
   // biome-ignore lint/complexity/noBannedTypes: Allow for {}
-  private setProjectToReport(suite: Suite, config: FullConfig<{}, {}>) {
+  private setProjectToReport(config: FullConfig<{}, {}>) {
     const projectsToReport: string[] = [];
-    // biome-ignore lint/suspicious/noExplicitAny: Allow for any
-    const entries: Array<any> = (suite as any)._entries;
-    const definedProjects = entries.flatMap((o) => o._fullProject.id);
 
     if (this.execInfo.testedBrowser !== undefined) {
       projectsToReport.push(this.execInfo.testedBrowser);
