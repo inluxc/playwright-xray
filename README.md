@@ -428,12 +428,16 @@ And you'll see the result in the Xray:
 
 ## Multiple Projects
 
-If you need to run multiple browsers, you need to use the project switch and run them after each other, e.g.
+If your `playwright.config.ts` defines multiple projects (e.g. multiple browsers, or projects with
+dependencies such as `setup`/`teardown`), all projects run in a single Playwright invocation are now
+reported and imported into the same Xray Test Execution.
+
+If you only want to report a single project, run with `--project=<name>`:
 ```console
-npx playwright test --project=Chrome 
-npx playwright test --project=Firefox
+npx playwright test --project=Chrome
 ```
-If multiple projects are selected in one run, only the first will be reported and imported to Xray. 
+
+To report all projects except a specific few, use the `projectsToExclude` option instead (see above).
 
 ## Multiple Test Plans
 
