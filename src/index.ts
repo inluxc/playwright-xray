@@ -1,7 +1,7 @@
 import type { FullConfig, FullResult, Reporter, Suite, TestCase, TestResult } from "@playwright/test/reporter";
 import { blue, bold, green, magenta, red, white, yellow } from "picocolors";
 import { getArg } from "./args";
-import { convertToXrayJson } from "./convert";
+import { convertToXrayJson, type TestResultEntry } from "./convert";
 import Help from "./help";
 import type { XrayTest, XrayTestResult } from "./types/cloud.types";
 import type { ExecInfo } from "./types/execInfo.types";
@@ -22,7 +22,7 @@ class XrayReporter implements Reporter {
   private uploadVideo: boolean | undefined;
   private projectsToExclude: string | string[] | undefined;
   private stepCategories = ["expect", "pw:api", "test.step"];
-  private readonly testsByKey: Map<string, TestResult[]>;
+  private readonly testsByKey: Map<string, TestResultEntry[]>;
   useMultipart: boolean | undefined;
 
   constructor(options: XrayOptions) {
@@ -111,11 +111,12 @@ class XrayReporter implements Reporter {
 
       for (const testCode of testCodeArray) {
         // Handle retries and data-driven tests for each test case ID
+        const entry: TestResultEntry = { result, project: projectId };
         const tests = this.testsByKey.get(testCode);
         if (!tests) {
-          this.testsByKey.set(testCode, [result]);
+          this.testsByKey.set(testCode, [entry]);
         } else {
-          tests.push(result);
+          tests.push(entry);
         }
       }
 

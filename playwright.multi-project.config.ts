@@ -4,6 +4,7 @@ import type { PlaywrightTestConfig } from "@playwright/test";
 // reported into a single Xray execution, not just the first project.
 const config: PlaywrightTestConfig = {
   testDir: "./tests/multi-project",
+  retries: 1,
   reporter: [
     [
       "./src/index.ts",
