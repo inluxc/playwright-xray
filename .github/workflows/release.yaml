@@ -14,9 +14,8 @@ on:
 
 permissions:
   contents: write
-
-env:
-  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  packages: write
+  id-token: write
 
 jobs:
   release:
@@ -26,14 +25,11 @@ jobs:
         with:
           ref: 'main'
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 24.x
+          node-version: 'lts/*'
           registry-url: 'https://registry.npmjs.org'
-      - name: NPM Setup
-        run: npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          package-manager-cache: false
       - name: Git Setup
         run: |
           git config --global user.email "inluxc@gmail.com"
@@ -48,4 +44,3 @@ jobs:
         run: npm run release:ci -- ${{github.event.inputs.releaseType}} --npm.tag=${{github.event.inputs.distTag}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
