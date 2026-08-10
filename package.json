@@ -17,7 +17,8 @@
     "release:minor": "npm run release -- minor",
     "release:major": "npm run release -- major",
     "format": "biome format --write",
-    "test": "npx playwright test simple.test.ts"
+    "test": "npx playwright test simple.test.ts",
+    "test:multi-project": "npx playwright test --config=playwright.multi-project.config.ts"
   },
   "repository": {
     "type": "git",

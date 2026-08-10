@@ -1,6 +1,7 @@
 import type { FullConfig, FullResult, Reporter, Suite, TestCase, TestResult } from "@playwright/test/reporter";
 import { blue, bold, green, magenta, red, white, yellow } from "picocolors";
-import { convertToXrayJson } from "./convert";
+import { getArg } from "./args";
+import { convertToXrayJson, type TestResultEntry } from "./convert";
 import Help from "./help";
 import type { XrayTest, XrayTestResult } from "./types/cloud.types";
 import type { ExecInfo } from "./types/execInfo.types";
@@ -21,7 +22,7 @@ class XrayReporter implements Reporter {
   private uploadVideo: boolean | undefined;
   private projectsToExclude: string | string[] | undefined;
   private stepCategories = ["expect", "pw:api", "test.step"];
-  private readonly testsByKey: Map<string, TestResult[]>;
+  private readonly testsByKey: Map<string, TestResultEntry[]>;
   useMultipart: boolean | undefined;
 
   constructor(options: XrayOptions) {
@@ -50,18 +51,19 @@ class XrayReporter implements Reporter {
       tests: [] as XrayTest[],
     };
     this.projectsToExclude = this.options.projectsToExclude;
+    const args = getArg("project");
     console.log(`${bold(blue("-------------------------------------"))}`);
     console.log(`${bold(blue(" "))}`);
     if (this.options.summary !== undefined) this.testResults.info.summary = this.options.summary;
     this.execInfo = {
       browserName: "",
-      testedBrowser: undefined,
+      testedBrowsers: typeof args === "boolean" || args === undefined ? undefined : [args],
     };
   }
 
   async onBegin(config: FullConfig, suite: Suite) {
     try {
-      this.setProjectToReport(suite, config);
+      this.setProjectToReport(config);
     } catch (error) {
       throw new Error(`Failed to obtain project with error: ${error}`);
     }
@@ -73,24 +75,30 @@ class XrayReporter implements Reporter {
     }
 
     console.log(`${bold(blue(" "))}`);
-    if (this.execInfo.testedBrowser !== undefined) {
+    if (this.execInfo.testedBrowsers !== undefined) {
       console.log(
-        `${bold(yellow("⏺  "))}${bold(blue(`The following test execution will be imported & reported:  ${this.execInfo.testedBrowser}`))}`,
+        `${bold(yellow("⏺  "))}${bold(blue(`The following test execution will be imported & reported:  ${this.execInfo.testedBrowsers.join(", ")}`))}`,
       );
     }
   }
 
   async onTestBegin(_test: TestCase) {
-    if (this.execInfo.testedBrowser === undefined) {
+    if (this.execInfo.testedBrowsers === undefined) {
       console.log(`${bold(yellow("⏺  "))}${bold(red("No projects to run, have you excluded all in your playwright config?"))}`);
       return;
     }
   }
+
   async onTestEnd(testCase: TestCase, result: TestResult) {
     const testCaseId = testCase.title.match(this.testCaseKeyPattern);
     const testCodes: string = testCaseId?.[1] ?? "";
     const projectId = JSON.stringify(testCase.parent.project()).match(/__projectId":"(.*)"/)?.[1];
-    if (this.execInfo.testedBrowser !== projectId) {
+
+    const normalizedTestedBrowsers = this.execInfo.testedBrowsers?.map((b) => b.toLowerCase());
+    if (!normalizedTestedBrowsers?.includes(projectId?.toLowerCase() ?? "")) {
+      console.log(
+        `${bold(white("⏺  "))}${bold(white(`Test case ${testCase.title} does not belong to the selected project. Running in project "${projectId}"`))}`,
+      );
       return;
     }
 
@@ -103,11 +111,12 @@ class XrayReporter implements Reporter {
 
       for (const testCode of testCodeArray) {
         // Handle retries and data-driven tests for each test case ID
+        const entry: TestResultEntry = { result, project: projectId };
         const tests = this.testsByKey.get(testCode);
         if (!tests) {
-          this.testsByKey.set(testCode, [result]);
+          this.testsByKey.set(testCode, [entry]);
         } else {
-          tests.push(result);
+          tests.push(entry);
         }
       }
 
@@ -158,17 +167,15 @@ class XrayReporter implements Reporter {
   }
 
   // biome-ignore lint/complexity/noBannedTypes: Allow for {}
-  private setProjectToReport(suite: Suite, config: FullConfig<{}, {}>) {
+  private setProjectToReport(config: FullConfig<{}, {}>) {
     const projectsToReport: string[] = [];
-    // biome-ignore lint/suspicious/noExplicitAny: Allow for any
-    const entries: Array<any> = (suite as any)._entries;
-    const cliArguments = entries.flatMap((o) => o._fullProject.fullConfig.cliProjectFilter);
-    if (cliArguments !== undefined && cliArguments[0] !== undefined) {
-      projectsToReport.push(cliArguments[0]);
-    }
-    // Exclude projects from the report
-    // If the projectsToExclude is an array, we will use the regex to exclude the projects
-    if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== "string" && this.projectsToExclude.length > 1) {
+
+    // If CLI --project was already resolved in the constructor, it wins outright —
+    if (this.execInfo.testedBrowsers !== undefined) {
+      projectsToReport.push(...this.execInfo.testedBrowsers);
+      // Exclude projects from the report
+      // If the projectsToExclude is an array, we will use the regex to exclude the projects
+    } else if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== "string" && this.projectsToExclude.length > 1) {
       this.removeExcludedProjects(config, this.projectsToExclude.join("|"), projectsToReport);
       // If the projectsToExclude is an array with one string, we will use the regex to exclude the projects
     } else if (this.projectsToExclude !== undefined && typeof this.projectsToExclude !== "string") {
@@ -183,18 +190,18 @@ class XrayReporter implements Reporter {
       }
     }
 
+    let browserNameBuilt = "";
     projectsToReport.forEach((p, index) => {
-      this.execInfo.browserName += index > 0 ? ", " : "";
-      this.execInfo.browserName += p.charAt(0).toUpperCase() + p.slice(1);
-      // Set the first browser as the tested browser
-      if (index === 0) {
-        this.execInfo.testedBrowser = p;
-        if (this.projectsToExclude?.includes(p))
-          console.log(
-            `${bold(yellow("⏺  "))}${bold(magenta(`Setting for projectsToExclude conflicts with CLI argument. Will go with CLI: ${p}`))}`,
-          );
+      browserNameBuilt += index > 0 ? ", " : "";
+      browserNameBuilt += p.charAt(0).toUpperCase() + p.slice(1);
+      if (index === 0 && this.projectsToExclude?.includes(p)) {
+        console.log(
+          `${bold(yellow("⏺  "))}${bold(magenta(`Setting for projectsToExclude conflicts with CLI argument. Will go with CLI: ${p}`))}`,
+        );
       }
     });
+    this.execInfo.browserName = browserNameBuilt;
+    this.execInfo.testedBrowsers = projectsToReport;
   }
 
   // biome-ignore lint/complexity/noBannedTypes: Allow for {}

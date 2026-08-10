@@ -147,7 +147,7 @@ export class XrayService {
         console.log(`${bold(yellow("⏺  "))}${bold(blue(`Revision:          ${this.options.revision}`))}`);
       }
       if (execInfo.browserName !== undefined) {
-        console.log(`${bold(yellow("⏺  "))}${bold(blue(`Browser:           ${execInfo.testedBrowser}`))}`);
+        console.log(`${bold(yellow("⏺  "))}${bold(blue(`Browser:           ${execInfo.testedBrowsers}`))}`);
       }
       console.log(`${bold(yellow("⏺  "))}${bold(blue(`Test plan:         ${this.options.testPlan}`))}`);
       if (this.options.testExecution !== undefined) {
@@ -220,7 +220,7 @@ export class XrayService {
 
     function writeRunResult(testPlan: string) {
       const runResult = {
-        browser: execInfo.testedBrowser,
+        browser: execInfo.testedBrowsers,
         testPlan: testPlan,
         testDuration: duration,
         testsRun: total,

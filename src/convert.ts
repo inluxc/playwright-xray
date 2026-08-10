@@ -27,20 +27,28 @@ type XrayTestEvidence = XrayTestEvidenceServer | XrayTestEvidenceCloud;
 type XrayIterationParameter = XrayIterationParameterServer | XrayIterationParameterCloud;
 
 /**
+ * A single Playwright test result together with the name of the project that produced it.
+ */
+export type TestResultEntry = {
+  result: TestResult;
+  project?: string;
+};
+
+/**
  * Converts a map of issue keys and Playwright test results to Xray JSON. If there are multiple tests grouped under a single issue key, a
  * corresponding Xray test with iterations will be returned. Otherwise, a single Xray test will be returned without iteration data.
  *
- * Note: it does not matter where the results come from. They can be retries or they can be data-driven results for a single test. Both will
- * be converted to iterations accordingly.
+ * Note: it does not matter where the results come from. They can be retries, data-driven results for a single test, or results from
+ * different Playwright projects (e.g. multiple browsers or dependent projects). All will be converted to iterations accordingly.
  *
  * @param groupedResults the mapping of issue keys to Playwright results
  * @param options additional conversion options
  * @returns the corresponding Xray test JSON
  */
-export async function convertToXrayJson(groupedResults: Map<string, TestResult[]>, options: ConversionOptions): Promise<XrayTest[]> {
+export async function convertToXrayJson(groupedResults: Map<string, TestResultEntry[]>, options: ConversionOptions): Promise<XrayTest[]> {
   const xrayTests: XrayTest[] = [];
-  for (const [issueKey, results] of groupedResults) {
-    xrayTests.push(await getTest(issueKey, results, options));
+  for (const [issueKey, entries] of groupedResults) {
+    xrayTests.push(await getTest(issueKey, entries, options));
   }
   return xrayTests;
 }
@@ -55,35 +63,44 @@ type ConversionOptions = {
   jiraXrayStatusMapping?: Partial<JiraXrayStatusMapping>;
 };
 
-async function getTest(issueKey: string, results: TestResult[], options: ConversionOptions): Promise<XrayTest> {
+async function getTest(issueKey: string, entries: TestResultEntry[], options: ConversionOptions): Promise<XrayTest> {
   const help = new Help(options.jiraType);
+  const results = entries.map((entry) => entry.result);
   let xrayTest: XrayTest;
 
   if (options.jiraType === "cloud") {
     xrayTest = {
-      status: getTestStatus(results, options),
+      status: getTestStatus(entries, options),
       testKey: issueKey,
       evidence: await getEvidences(results, options),
     };
   } else {
     xrayTest = {
-      status: getTestStatus(results, options),
+      status: getTestStatus(entries, options),
       testKey: issueKey,
       evidences: await getEvidences(results, options),
     };
   }
 
-  if (results.length > 1) {
+  if (entries.length > 1) {
+    // If the same test key produced results across more than one Playwright project (e.g. multiple
+    // browsers, or dependent projects), label each iteration with its project name instead of a plain
+    // counter, since Xray already numbers iterations itself.
+    const distinctProjects = new Set(entries.map((entry) => entry.project).filter((project): project is string => !!project));
     const iterations: XrayTestIteration[] = [];
-    for (let i = 0; i < results.length; i++) {
-      const result = results[i];
+    for (let i = 0; i < entries.length; i++) {
+      const { result, project } = entries[i];
       const metadata = getXrayMetadata(result);
       const iterationParameters: XrayIterationParameter[] = Object.entries(metadata?.parameters ?? {}).map(([key, value]) => {
         return { name: key, value: value };
       });
+      const iterationParameter: XrayIterationParameter =
+        distinctProjects.size > 1 && project !== undefined
+          ? { name: "project", value: project }
+          : { name: "iteration", value: (iterations.length + 1).toString() };
       iterations.push({
         status: getIterationStatus(result.status, options),
-        parameters: [{ name: "iteration", value: (iterations.length + 1).toString() }, ...iterationParameters],
+        parameters: [iterationParameter, ...iterationParameters],
         steps: getSteps(result, options),
       });
     }
@@ -102,18 +119,59 @@ async function getTest(issueKey: string, results: TestResult[], options: Convers
   return xrayTest;
 }
 
-function getTestStatus(iterations: TestResult[], options: ConversionOptions) {
-  if (iterations.every((iteration) => iteration.status === "failed" || iteration.status === "timedOut")) {
-    return getIterationStatus("failed", options);
+type AggregateStatus = "failed" | "interrupted" | "skipped" | "passed";
+
+/**
+ * Determines the overall status for a test key across all of its results.
+ *
+ * Results are first grouped by Playwright project. Within a project, retries are flaky-forgiving
+ * (one passing attempt is enough for that project to count as passed) - but a project that genuinely
+ * failed is never masked by another project passing: any project failing fails the whole test.
+ */
+function getTestStatus(entries: TestResultEntry[], options: ConversionOptions) {
+  const resultsByProject = groupResultsByProject(entries);
+  const projectStatuses = resultsByProject.map((results) => getAggregateStatus(results));
+
+  let overall: AggregateStatus;
+  if (projectStatuses.includes("failed")) {
+    overall = "failed";
+  } else if (projectStatuses.includes("interrupted")) {
+    overall = "interrupted";
+  } else if (projectStatuses.every((status) => status === "skipped")) {
+    overall = "skipped";
+  } else {
+    // Note: flaky tests are also considered passing by default.
+    overall = "passed";
   }
-  if (iterations.some((iteration) => iteration.status === "interrupted")) {
-    return getIterationStatus("interrupted", options);
+
+  return getIterationStatus(overall, options);
+}
+
+function getAggregateStatus(results: TestResult[]): AggregateStatus {
+  if (results.every((result) => result.status === "failed" || result.status === "timedOut")) {
+    return "failed";
   }
-  if (iterations.every((iteration) => iteration.status === "skipped")) {
-    return getIterationStatus("skipped", options);
+  if (results.some((result) => result.status === "interrupted")) {
+    return "interrupted";
   }
-  // Note: flaky tests are also considered passing by default.
-  return getIterationStatus("passed", options);
+  if (results.every((result) => result.status === "skipped")) {
+    return "skipped";
+  }
+  return "passed";
+}
+
+function groupResultsByProject(entries: TestResultEntry[]): TestResult[][] {
+  const resultsByProject = new Map<string, TestResult[]>();
+  for (const entry of entries) {
+    const project = entry.project ?? "";
+    const results = resultsByProject.get(project);
+    if (results) {
+      results.push(entry.result);
+    } else {
+      resultsByProject.set(project, [entry.result]);
+    }
+  }
+  return [...resultsByProject.values()];
 }
 
 function getIterationStatus(status: TestStatus, options: ConversionOptions) {
