@@ -109,7 +109,7 @@ test('J79,J80 | basic test', async ({ page }) => {
 Is it possible to add some optional values to the Test Execution ticket.
 
 `projectsToExclude` - The Playwright projects that should not be reported to XRAY. Default is `undefined`. Othervise set it to array of values or to a single value, that is equal the name field of project in `playwright.config.ts`. E.g. [`setup`, `cleanup`] or `setup`.
-RegExp can also be used e.g. `projectsToExclude = 'setup.*'`. If e.g. `projectsToExclude = 'firefox'` that conflicts with the command line argument e.g.`--project='firefox'` is used, then the `projectsToExclude` will be ignored.
+RegExp can also be used e.g. `projectsToExclude = 'setup.*'`. The exclusion is also applied when projects are selected with `--project`, so e.g. `projectsToExclude: ['setup']` keeps a dependency project out of the report even though Playwright runs it. Only if the exclusion would remove every project selected with `--project` (e.g. `projectsToExclude = 'firefox'` with `--project='firefox'`), the command line wins: `projectsToExclude` is ignored and this is logged to the console.
 
 ```typescript
 // playwright.config.ts
@@ -432,12 +432,16 @@ If your `playwright.config.ts` defines multiple projects (e.g. multiple browsers
 dependencies such as `setup`/`teardown`), all projects run in a single Playwright invocation are now
 reported and imported into the same Xray Test Execution.
 
-If you only want to report a single project, run with `--project=<name>`:
+To report only some projects, select them with `--project`. Everything Playwright actually runs is reported,
+including repeated flags, wildcards and dependency projects (e.g. `setup`):
 ```console
 npx playwright test --project=Chrome
+npx playwright test --project=Chrome --project=Firefox
+npx playwright test --project='ffs-*'
 ```
 
-To report all projects except a specific few, use the `projectsToExclude` option instead (see above).
+To keep specific projects out of the report (e.g. dependency projects like `setup` that have no Xray keys
+worth reporting), use the `projectsToExclude` option (see above). It is applied with or without `--project` arg.
 
 ## Multiple Test Plans
 
