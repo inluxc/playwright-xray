@@ -18,6 +18,7 @@
     "release:major": "npm run release -- major",
     "format": "biome format --write",
     "test": "npx playwright test simple.test.ts",
+    "test:unit": "tsx --test \"src/tests/*.test.ts\"",
     "test:multi-project": "npx playwright test --config=playwright.multi-project.config.ts"
   },
   "repository": {

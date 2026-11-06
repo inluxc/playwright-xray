@@ -2,8 +2,13 @@ import assert from "node:assert";
 import fs from "node:fs";
 import { describe, it } from "node:test";
 import type { TestResult } from "@playwright/test/reporter";
-import { convertToXrayJson } from "./convert.ts";
-import { convertToMultipart, verifyMultipatConfig } from "./convertToMultipart.ts";
+import { convertToXrayJson, type TestResultEntry } from "../convert.ts";
+import { convertToMultipart, verifyMultipatConfig } from "../convertToMultipart.ts";
+
+/** Wrap plain results as entries without a project, i.e. a single-project run. */
+function toEntries(map: Map<string, TestResult[]>): Map<string, TestResultEntry[]> {
+  return new Map([...map].map(([key, results]) => [key, results.map((result) => ({ result }))]));
+}
 
 describe(convertToXrayJson.name, async () => {
   await it("single test", async () => {
@@ -24,7 +29,7 @@ describe(convertToXrayJson.name, async () => {
       },
     ]);
     assert.deepStrictEqual(
-      await convertToXrayJson(map, {
+      await convertToXrayJson(toEntries(map), {
         jiraType: "cloud",
         receivedRegEx: /Received string: "(.*?)"(?=\n)/,
         stepCategories: ["expect", "pw:api", "test.step"],
@@ -151,7 +156,7 @@ describe(convertToXrayJson.name, async () => {
         steps: [],
       },
     ]);
-    const val = await convertToXrayJson(map, {
+    const val = await convertToXrayJson(toEntries(map), {
       jiraType: "server",
       receivedRegEx: /Received string: "(.*?)"(?=\n)/,
       stepCategories: ["expect", "pw:api", "test.step"],
@@ -214,7 +219,7 @@ describe(convertToXrayJson.name, async () => {
         steps: [],
       },
     ];
-    const actual = await convertToXrayJson(map, {
+    const actual = await convertToXrayJson(toEntries(map), {
       jiraType: "server",
       receivedRegEx: /Received string: "(.*?)"(?=\n)/,
       stepCategories: ["expect", "pw:api", "test.step"],
@@ -308,7 +313,7 @@ describe(convertToXrayJson.name, async () => {
         comment: expectedComment,
       },
     ];
-    const actual = await convertToXrayJson(map, {
+    const actual = await convertToXrayJson(toEntries(map), {
       jiraType: "server",
       receivedRegEx: /Received string: "(.*?)"(?=\n)/,
       stepCategories: ["expect", "pw:api", "test.step"],
@@ -362,7 +367,7 @@ describe(convertToXrayJson.name, async () => {
         workerIndex: 0,
       },
     ]);
-    const actual = await convertToXrayJson(map, {
+    const actual = await convertToXrayJson(toEntries(map), {
       jiraType: "server",
       receivedRegEx: /Received string: "(.*?)"(?=\n)/,
       stepCategories: ["expect", "pw:api", "test.step"],
@@ -428,7 +433,7 @@ describe(convertToXrayJson.name, async () => {
       },
     ]);
 
-    const actual = await convertToXrayJson(map, {
+    const actual = await convertToXrayJson(toEntries(map), {
       jiraType: "server",
       receivedRegEx: /Received string: "(.*?)"(?=\n)/,
       stepCategories: ["expect", "pw:api", "test.step"],
@@ -533,7 +538,7 @@ describe(convertToXrayJson.name, async () => {
         comment: expectedComment,
       },
     ];
-    const actual = await convertToXrayJson(map, {
+    const actual = await convertToXrayJson(toEntries(map), {
       jiraType: "cloud",
       receivedRegEx: /Received string: "(.*?)"(?=\n)/,
       stepCategories: ["expect", "pw:api", "test.step"],
@@ -687,7 +692,7 @@ describe(convertToXrayJson.name, async () => {
       },
     ]);
 
-    const actual = await convertToXrayJson(map, {
+    const actual = await convertToXrayJson(toEntries(map), {
       jiraType: "cloud",
       receivedRegEx: /Received string: "(.*?)"(?=\n)/,
       stepCategories: ["expect", "pw:api", "test.step"],
